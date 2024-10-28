@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import hms.Appointments.Appointment;
+
 public class HMSAdmin extends User {
     private List<Staff> staffList;
     private List<Appointment> appointmentList;

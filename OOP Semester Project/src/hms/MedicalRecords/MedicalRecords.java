@@ -17,7 +17,7 @@ enum Gender {
     Female
 }
 
-public class MedicalRecords implements PatientView, DoctorView {
+public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDoctorView {
 
     private String id;
     private String name;
@@ -46,11 +46,11 @@ public class MedicalRecords implements PatientView, DoctorView {
 
     }
 
-    public static PatientView getRecord(Patient caller, String patientId) throws IOException {
+    public static MedicalRecordPatientView getRecord(Patient caller, String patientId) throws IOException {
         return new MedicalRecords(patientId);
     }
 
-    public static DoctorView getRecord(Doctor caller, String patientId) throws IOException {
+    public static MedicalRecordDoctorView getRecord(Doctor caller, String patientId) throws IOException {
         return new MedicalRecords(patientId);
     }
 
@@ -121,8 +121,6 @@ public class MedicalRecords implements PatientView, DoctorView {
     }
 
     public void saveToFile() throws IOException {
-        FileReader file = new FileReader("../data/medical_record.csv");
-
         List<String> lines = Files.readAllLines(Paths.get("../data/medical_record.csv"));
         FileOutputStream output = new FileOutputStream("../data/medical_record.csv");
 
@@ -139,7 +137,6 @@ public class MedicalRecords implements PatientView, DoctorView {
         }
 
         output.close();
-        file.close();
     }
 }
 

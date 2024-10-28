@@ -2,7 +2,7 @@ package hms.MedicalRecords;
 
 import java.io.IOException;
 
-public interface DoctorView {
+public interface MedicalRecordDoctorView {
   String toString();
 
   void newDiagnosis(String diagnosis);

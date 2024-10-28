@@ -2,7 +2,7 @@ package hms.MedicalRecords;
 
 import java.io.IOException;
 
-public interface PatientView {
+public interface MedicalRecordPatientView {
   String toString();
 
   void updateEmailAddress(String email);
