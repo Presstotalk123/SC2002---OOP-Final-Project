@@ -1,0 +1,3 @@
+id,name,password,role
+1,Mikko,password,patient
+2,Beth,password,admin

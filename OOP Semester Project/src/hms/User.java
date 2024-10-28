@@ -1,14 +1,51 @@
 package hms;
 
-public abstract class User {
-    protected String userId;
-    protected String password;
+import java.io.BufferedReader;  
+import java.io.FileReader;  
+import java.io.IOException;  
+import java.util.ArrayList;
+import java.util.List;
 
-    public User(String userId, String password) {
-        this.userId = userId;
-        this.password = password;
+public abstract class User {
+
+  public String id;
+  public String name;
+  private String password;
+
+  public User(String id, String name, String password) {
+    this.id = id;
+    this.name = name;
+    this.password = password;
+  }
+
+  public boolean login(String password) {
+    return this.password.equals(password);
+  }
+
+  public static List<User> load_from_file(String path) throws IOException {
+
+    List<User> userArray = new ArrayList<User>();
+    BufferedReader file = new BufferedReader(new FileReader(path));
+
+    String nextLine = file.readLine();
+    while ((nextLine = file.readLine()) != null) {
+      String[] user = nextLine.split(",");
+
+      String role = user[3];
+      // TOOD: Add support for all kinds of users
+      if (role.equals("patient")) {
+        userArray.add(new Patient(user[0], user[1], user[2]));
+      } else if (role.equals("admin")) {
+        userArray.add(new HMSAdmin(user[0], user[1], user[2]));
+      }
     }
 
-    public abstract void login();
-}
+    file.close();
 
+    return userArray;
+  }
+
+  // Return true to logout
+  public abstract boolean eventLoop();
+
+}

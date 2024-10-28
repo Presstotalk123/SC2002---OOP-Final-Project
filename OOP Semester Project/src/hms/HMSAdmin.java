@@ -1,17 +1,17 @@
 package hms;
 
 import java.io.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-public class HMSAdmin {
+public class HMSAdmin extends User {
     private List<Staff> staffList;
     private List<Appointment> appointmentList;
     private Inventory inventory;
 
-    public HMSAdmin() {
+    public HMSAdmin(String id, String name, String password) {
+        super(id, name, password);
         staffList = new ArrayList<>();
         appointmentList = new ArrayList<>();
         inventory = new Inventory();
@@ -20,39 +20,39 @@ public class HMSAdmin {
         loadInventoryData();
     }
 
-    public void start() {
+    public boolean eventLoop() {
         Scanner scanner = new Scanner(System.in);
         int choice;
-        do {
-            System.out.println("Administrator Menu:");
-            System.out.println("1. View Staff");
-            System.out.println("2. Manage Staff");
-            System.out.println("3. View Appointments");
-            System.out.println("4. Manage Inventory");
-            System.out.println("5. Exit");
-            choice = scanner.nextInt();
-            scanner.nextLine(); // Consume newline
-
-            switch (choice) {
-                case 1:
-                    viewStaff();
-                    break;
-                case 2:
-                    manageStaff(scanner);
-                    break;
-                case 3:
-                    viewAppointments();
-                    break;
-                case 4:
-                    manageInventory(scanner);
-                    break;
-                case 5:
-                    System.out.println("Exiting...");
-                    break;
-                default:
-                    System.out.println("Invalid choice. Please try again.");
-            }
-        } while (choice != 5);
+        System.out.println("Administrator Menu:");
+        System.out.println("1. View Staff");
+        System.out.println("2. Manage Staff");
+        System.out.println("3. View Appointments");
+        System.out.println("4. Manage Inventory");
+        System.out.println("5. Log Out");
+        choice = scanner.nextInt();
+        scanner.nextLine();
+        switch (choice) {
+            case 1:
+                viewStaff();
+                break;
+            case 2:
+                manageStaff(scanner);
+                break;
+            case 3:
+                viewAppointments();
+                break;
+            case 4:
+                manageInventory(scanner);
+                break;
+            case 5:
+                // Returning false just means "I want to log out and go back to the login menu"
+                scanner.close();
+                return false;
+            default:
+                System.out.println("Invalid choice. Please try again.");
+        }
+        // Returning true just means "Yes I want to continue as this user"
+        return true;
     }
 
     private void viewStaff() {
@@ -61,7 +61,12 @@ public class HMSAdmin {
             System.out.println(staff);
         }
         System.out.println("Press Enter to return to the admin menu.");
-        new Scanner(System.in).nextLine(); // Wait for user to press Enter
+
+        // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
+        // leak
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine(); // Wait for user to press Enter
+        scanner.close();
     }
 
     private void manageStaff(Scanner scanner) {
@@ -126,9 +131,12 @@ public class HMSAdmin {
                 System.out.println("Enter new Staff Gender (or leave blank to keep current):");
                 String newGender = scanner.nextLine();
 
-                if (!newName.isEmpty()) staff.setName(newName);
-                if (!newRole.isEmpty()) staff.setRole(newRole);
-                if (!newGender.isEmpty()) staff.setGender(newGender);
+                if (!newName.isEmpty())
+                    staff.setName(newName);
+                if (!newRole.isEmpty())
+                    staff.setRole(newRole);
+                if (!newGender.isEmpty())
+                    staff.setGender(newGender);
 
                 saveStaffData(); // Save changes to the file
                 System.out.println("Staff member updated successfully.");
@@ -182,7 +190,7 @@ public class HMSAdmin {
                 System.out.println("Invalid choice. Please try again.");
         }
         System.out.println("Press Enter to return to the Manage Staff menu.");
-        new Scanner(System.in).nextLine(); // Wait for user to press Enter
+        scanner.nextLine(); // Wait for user to press Enter
     }
 
     private void viewAppointments() {
@@ -191,7 +199,11 @@ public class HMSAdmin {
             System.out.println(appointment);
         }
         System.out.println("Press Enter to return to the admin menu.");
-        new Scanner(System.in).nextLine(); // Wait for user to press Enter
+        // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
+        // leak
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine(); // Wait for user to press Enter
+        scanner.close();
     }
 
     private void manageInventory(Scanner scanner) {
@@ -236,7 +248,11 @@ public class HMSAdmin {
         System.out.println("Current Inventory:");
         inventory.getItems().forEach(System.out::println);
         System.out.println("Press Enter to return to the Manage Inventory menu.");
-        new Scanner(System.in).nextLine(); // Wait for user to press Enter
+        // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
+        // leak
+        Scanner scanner = new Scanner(System.in);
+        scanner.nextLine(); // Wait for user to press Enter
+        scanner.close();
     }
 
     private void addInventoryItem(Scanner scanner) {
@@ -262,8 +278,10 @@ public class HMSAdmin {
             System.out.println("Enter new Low Stock Alert Level (or leave blank to keep current):");
             String newLowStock = scanner.nextLine();
 
-            if (!newStock.isEmpty()) item.setStock(Integer.parseInt(newStock));
-            if (!newLowStock.isEmpty()) item.setLowStockLevel(Integer.parseInt(newLowStock));
+            if (!newStock.isEmpty())
+                item.setStock(Integer.parseInt(newStock));
+            if (!newLowStock.isEmpty())
+                item.setLowStockLevel(Integer.parseInt(newLowStock));
 
             saveInventoryData(); // Save changes to the file
             System.out.println("Inventory item updated successfully.");
@@ -297,7 +315,7 @@ public class HMSAdmin {
     }
 
     private void loadStaffData() {
-        try (BufferedReader br = new BufferedReader(new FileReader("staff_data.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("../data/staff_data.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
@@ -314,7 +332,7 @@ public class HMSAdmin {
     }
 
     private void loadInventoryData() {
-        try (BufferedReader br = new BufferedReader(new FileReader("inventory_data.txt"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("inventory_data.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
@@ -326,7 +344,7 @@ public class HMSAdmin {
     }
 
     private void saveStaffData() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("staff_data.txt"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("staff_data.csv"))) {
             for (Staff staff : staffList) {
                 bw.write(staff.getId() + "," + staff.getName() + "," + staff.getRole() + "," + staff.getGender());
                 bw.newLine();
@@ -337,7 +355,7 @@ public class HMSAdmin {
     }
 
     private void saveInventoryData() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("inventory_data.txt"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("inventory_data.csv"))) {
             for (InventoryItem item : inventory.getItems()) {
                 bw.write(item.getName() + "," + item.getStock() + "," + item.getLowStockLevel());
                 bw.newLine();

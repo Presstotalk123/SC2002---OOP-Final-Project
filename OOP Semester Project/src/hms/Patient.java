@@ -1,15 +1,19 @@
 package hms;
 
+public class Patient extends User {
 
-public interface IPatient extends User {
+  public Patient(String id, String name, String password) {
+    super(id, name, password);
+  }
 
-}
+  public boolean eventLoop() {
 
-public class Patient implements IPatient {
+    System.out.println("Got here!");
+    return true;
 
-    public static IPatient Patient() {
-        return new Patient();
-    }
+  }
+
+
 
 }
 

@@ -29,7 +29,9 @@ public class Inventory {
     public void updateStockLevel(String name, int quantity) {
         for (InventoryItem item : items) {
             if (item.getName().equals(name)) {
-                item.updateStockLevel(quantity);
+                // this is broken, nothing called updateStockLevel() in InventoryItem.java
+                System.out.println("hey fix this, item.updateStockLevel doesn't exist on InventoryItem");
+                // item.updateStockLevel(quantity);
                 break;
             }
         }
