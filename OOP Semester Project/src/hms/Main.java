@@ -11,7 +11,7 @@ public class Main {
     // Load data on program startup
     List<User> users;
     try {
-      users = User.load_from_file("../data/users.csv");
+      users = User.loadFromFile("../data/users.csv");
       System.out.println(users);
     } catch (IOException error) {
       System.out.println("Error occurred when loading data: ");
@@ -28,8 +28,6 @@ public class Main {
       String hospitalId = input.nextLine().replace("\n", "");
       System.out.print("Please enter your Password: ");
       String password = input.nextLine().replace("\n", "");
-
-      input.close();
 
       User loggedInUser = null;
 
@@ -49,7 +47,7 @@ public class Main {
 
         // Keep repeating the event loop of the user until eventLoop returns false
         // in other words, user logs out.
-        while (loggedInUser.eventLoop()) {}
+        while (loggedInUser.eventLoop(input)) {}
       }
 
     }

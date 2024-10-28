@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;  
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public abstract class User {
 
@@ -22,7 +23,7 @@ public abstract class User {
     return this.password.equals(password);
   }
 
-  public static List<User> load_from_file(String path) throws IOException {
+  public static List<User> loadFromFile(String path) throws IOException {
 
     List<User> userArray = new ArrayList<User>();
     BufferedReader file = new BufferedReader(new FileReader(path));
@@ -46,6 +47,6 @@ public abstract class User {
   }
 
   // Return true to logout
-  public abstract boolean eventLoop();
+  public abstract boolean eventLoop(Scanner scanner);
 
 }

@@ -1,17 +1,21 @@
 package hms;
 
+import java.util.Scanner;
+
 public class Doctor extends User {
     private String specialty;
 
-    public Doctor(String userId, String password, String specialty) {
-        super(userId, password);
+    public Doctor(String id, String name, String password) {
+        super(id, name, password);
         this.specialty = specialty;
     }
 
-    @Override
-    public void login() {
-        // Implement doctor login logic
+    public boolean eventLoop(Scanner scanner) {
+        System.out.println("Not Implemented Yet");
+        return false;
     }
+
+    
 
     // Getters and setters for doctor-specific fields
 }

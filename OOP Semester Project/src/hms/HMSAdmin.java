@@ -20,8 +20,7 @@ public class HMSAdmin extends User {
         loadInventoryData();
     }
 
-    public boolean eventLoop() {
-        Scanner scanner = new Scanner(System.in);
+    public boolean eventLoop(Scanner scanner) {
         int choice;
         System.out.println("Administrator Menu:");
         System.out.println("1. View Staff");
@@ -33,20 +32,19 @@ public class HMSAdmin extends User {
         scanner.nextLine();
         switch (choice) {
             case 1:
-                viewStaff();
+                viewStaff(scanner);
                 break;
             case 2:
                 manageStaff(scanner);
                 break;
             case 3:
-                viewAppointments();
+                viewAppointments(scanner);
                 break;
             case 4:
                 manageInventory(scanner);
                 break;
             case 5:
                 // Returning false just means "I want to log out and go back to the login menu"
-                scanner.close();
                 return false;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -55,7 +53,7 @@ public class HMSAdmin extends User {
         return true;
     }
 
-    private void viewStaff() {
+    private void viewStaff(Scanner scanner) {
         System.out.println("Viewing staff...");
         for (Staff staff : staffList) {
             System.out.println(staff);
@@ -64,9 +62,7 @@ public class HMSAdmin extends User {
 
         // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
         // leak
-        Scanner scanner = new Scanner(System.in);
         scanner.nextLine(); // Wait for user to press Enter
-        scanner.close();
     }
 
     private void manageStaff(Scanner scanner) {
@@ -193,7 +189,7 @@ public class HMSAdmin extends User {
         scanner.nextLine(); // Wait for user to press Enter
     }
 
-    private void viewAppointments() {
+    private void viewAppointments(Scanner scanner) {
         System.out.println("Viewing appointments...");
         for (Appointment appointment : appointmentList) {
             System.out.println(appointment);
@@ -201,9 +197,7 @@ public class HMSAdmin extends User {
         System.out.println("Press Enter to return to the admin menu.");
         // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
         // leak
-        Scanner scanner = new Scanner(System.in);
         scanner.nextLine(); // Wait for user to press Enter
-        scanner.close();
     }
 
     private void manageInventory(Scanner scanner) {
@@ -221,7 +215,7 @@ public class HMSAdmin extends User {
 
             switch (choice) {
                 case 1:
-                    viewInventory();
+                    viewInventory(scanner);
                     break;
                 case 2:
                     addInventoryItem(scanner);
@@ -244,15 +238,13 @@ public class HMSAdmin extends User {
         } while (choice != 6);
     }
 
-    private void viewInventory() {
+    private void viewInventory(Scanner scanner) {
         System.out.println("Current Inventory:");
         inventory.getItems().forEach(System.out::println);
         System.out.println("Press Enter to return to the Manage Inventory menu.");
         // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
         // leak
-        Scanner scanner = new Scanner(System.in);
         scanner.nextLine(); // Wait for user to press Enter
-        scanner.close();
     }
 
     private void addInventoryItem(Scanner scanner) {
