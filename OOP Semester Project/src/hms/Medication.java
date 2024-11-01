@@ -1,5 +1,3 @@
-package hms;
-
 public class Medication {
     private String medicationName;
     private int stockLevel;
@@ -15,31 +13,15 @@ public class Medication {
         return medicationName;
     }
 
-    public void setMedicationName(String medicationName) {
-        this.medicationName = medicationName;
-    }
-
     public int getStockLevel() {
         return stockLevel;
-    }
-
-    public void setStockLevel(int stockLevel) {
-        this.stockLevel = stockLevel;
     }
 
     public int getLowStockAlertLevel() {
         return lowStockAlertLevel;
     }
 
-    public void setLowStockAlertLevel(int lowStockAlertLevel) {
-        this.lowStockAlertLevel = lowStockAlertLevel;
-    }
-
     public void updateStockLevel(int quantity) {
-        this.stockLevel += quantity;
-    }
-
-    public int checkStockLevel() {
-        return stockLevel;
+        this.stockLevel = quantity;
     }
 }

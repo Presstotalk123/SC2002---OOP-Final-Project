@@ -1,241 +1,84 @@
-package hms;
+import java.util.Date;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+public class Patient {
+    private String patientUsername;
+    private String name;
+    private Date dateOfBirth;
+    private String gender;
+    private ContactInfo contactInfo;
+    private String password;
 
-import hms.MedicalRecords.MedicalRecords;
-import hms.Appointments.AppointmentPatientView;
-import hms.Appointments.AppointmentStatus;
-import hms.MedicalRecords.MedicalRecordPatientView;
-
-public class Patient extends User {
-
-    // Store MedicalRecord as a PatientView so only Patient methods are exposed.
-    private MedicalRecordPatientView patientRecord;
-
-    public Patient(String id, String name, String password) throws IOException {
-        super(id, name, password);
-
-        MedicalRecordPatientView record = MedicalRecords.getRecord(this, id);
-        this.patientRecord = record;
+    public Patient(String patientUsername, String name, Date dateOfBirth, String gender, ContactInfo contactInfo, String password) {
+        this.patientUsername = patientUsername;
+        this.name = name;
+        this.dateOfBirth = dateOfBirth;
+        this.gender = gender;
+        this.contactInfo = contactInfo;
+        this.password = password;
     }
 
-    public boolean eventLoop(Scanner scanner) {
-
-        System.out.print("""
-                Patient Menu:
-                1. View Medical Records
-                2. Update Email or Phone Number
-                3. Schedule New Appointment
-                4. Reschedule/Cancel Existing Appointment
-                5. View all your Appointment Statuses
-                6. View Appointment Outcome Records
-                7. Log Out
-                Enter your choice:""");
-
-        int choice = scanner.nextInt();
-        scanner.nextLine();
-
-        System.out.println("");
-
-        switch (choice) {
-            case 1:
-                System.out.println(this.patientRecord);
-                break;
-            case 2:
-                System.out.print("Enter a new email address (leave blank to keep existing value): ");
-                String newEmail = scanner.nextLine();
-                System.out.print("Enter a new phone number (leave blank to keep existing value): ");
-                String newPhoneNumber = scanner.nextLine();
-                this.patientRecord.updateEmailAddress(newEmail);
-                this.patientRecord.updatePhoneNumber(newPhoneNumber);
-                try {
-                    this.patientRecord.saveToFile();
-                    System.out.println("All changes successful!");
-                } catch (IOException error) {
-                    System.out.println("Error occurred when saving data: ");
-                    error.printStackTrace();
-                }
-                System.out.println("");
-                break;
-            case 3:
-                this.scheduleAppointment(scanner);
-                break;
-            case 4:
-                this.rescheduleOrCancelAppointment(scanner);
-                break;
-            case 5:
-                this.viewAppointmentStatuses();
-                break;
-            case 6:
-                // TODO: Implement when Doctor and Pharmacist are done.
-                System.out.println("Not Implemented Yet\n");
-                break;
-            case 7:
-                return false;
-
-            default:
-                System.out.println("Invalid choice. Please enter a number from 1 to 7.");
-                break;
-        }
-
-        return true;
-
+    public String getPatientID() {
+        return patientUsername;
     }
 
-    private void rescheduleOrCancelAppointment(Scanner scanner) {
-        try {
-
-            System.out.println("To reschedule an appointment, you need to cancel an existing appointment.");
-            System.out.println("After cancelling, you'll be asked if you want to schedule a new appointment.");
-            System.out.println(
-                    "Please choose an appointment to cancel:\n");
-            List<AppointmentPatientView> appts = AppointmentPatientView.loadAllAppointments();
-            Iterator<AppointmentPatientView> it = appts.iterator();
-            boolean foundAnyAppts = false;
-            while (it.hasNext()) {
-                AppointmentPatientView appt = it.next();
-                if (appt.getPatientId().isPresent() && appt.getPatientId().get().equals(this.id)) {
-                    System.out.println("(" + appt.getId() + ") - " + appt.getDateTime().toString());
-                    foundAnyAppts = true;
-                }
-            }
-
-            if (!foundAnyAppts) {
-                System.out.println("You have no booked appointments!\n");
-                return;
-            }
-
-            System.out.println("");
-
-            System.out.print("Enter the ID of the appointment you want to cancel: ");
-            String selectedAppointmentId = scanner.nextLine();
-
-            boolean wasCancellationSuccessful = false;
-            it = appts.iterator();
-            while (it.hasNext()) {
-                AppointmentPatientView appt = it.next();
-                if (appt.getId().equals(selectedAppointmentId) && appt.getPatientId().isPresent()
-                        && appt.getPatientId().get().equals(this.id)) {
-                    appt.cancel();
-                    appt.save();
-                    wasCancellationSuccessful = true;
-                    break;
-                }
-            }
-
-            if (!wasCancellationSuccessful) {
-                System.out.println("Invalid Appointment ID! Returning to main menu...");
-            } else {
-                System.out.println("Cancellation was successful!\n");
-            }
-
-            while (true) {
-                System.out.print("""
-                        Choose an option to continue:
-                        1. Schedule a new appointment
-                        2. Back to Patient Menu
-                        Enter your choice: """);
-
-                int choice = scanner.nextInt();
-                scanner.nextLine();
-
-                if (choice == 1) {
-                    this.scheduleAppointment(scanner);
-                    return;
-                } else if (choice == 2) {
-                    return;
-                } else {
-                    System.out.println("Invalid option! Please enter a value between 1-2.");
-                }
-            }
-
-        } catch (IOException error) {
-            System.out.println("Error occurred cancelling new appointment: ");
-            error.printStackTrace();
-        }
+    public void setpatientUsername(String patientUsername) {
+        this.patientUsername = patientUsername;
     }
 
-    private void scheduleAppointment(Scanner scanner) {
-        try {
-            List<AppointmentPatientView> appts = AppointmentPatientView.loadAllAppointments();
 
-            System.out.println("Here are all the available appointments:");
-            Iterator<AppointmentPatientView> it = appts.iterator();
-            boolean foundAnyAppts = false;
-            while (it.hasNext()) {
-                AppointmentPatientView appt = it.next();
-                if (appt.isBookable()) {
-                    System.out.println("(" + appt.getId() + ") - " + appt.getDateTime().toString());
-                    foundAnyAppts = true;
-                }
-            }
 
-            if (!foundAnyAppts) {
-                System.out.println("No more available appointments!\n");
-                return;
-            }
-
-            System.out.print("Enter the ID of the appointment you want to book: ");
-            String selectedAppointmentId = scanner.nextLine();
-
-            boolean wasBookingSuccessful = false;
-            it = appts.iterator();
-            while (it.hasNext()) {
-                AppointmentPatientView appt = it.next();
-                if (appt.getId().equals(selectedAppointmentId)) {
-                    appt.schedule(this.id);
-                    appt.save();
-                    wasBookingSuccessful = true;
-                    break;
-                }
-            }
-
-            if (!wasBookingSuccessful) {
-                System.out.println("Invalid Appointment ID! Returning to main menu...");
-            } else {
-                System.out.println("Booking was successful!");
-            }
-
-        } catch (IOException error) {
-            System.out.println("Error occurred scheduling new appointment: ");
-            error.printStackTrace();
-        }
+    public String getName() {
+        return name;
     }
 
-    private void viewAppointmentStatuses() {
-        try {
-
-            System.out.println("Here are all your booked appointments and their statuses:\n");
-            List<AppointmentPatientView> appts = AppointmentPatientView.loadAllAppointments();
-            Iterator<AppointmentPatientView> it = appts.iterator();
-            boolean foundAnyAppts = false;
-            while (it.hasNext()) {
-                AppointmentPatientView appt = it.next();
-                if (appt.getPatientId().isPresent() && appt.getPatientId().get().equals(this.id)) {
-                    Optional<AppointmentStatus> status = appt.getStatus();
-                    System.out.println(
-                            "(" + appt.getId() + ") - " + appt.getDateTime().toString() + " - " + (status.isEmpty()
-                                    ? "PENDING"
-                                    : status.get().toString().toUpperCase()));
-                    foundAnyAppts = true;
-                }
-            }
-
-            if (!foundAnyAppts) {
-                System.out.println("You have no booked appointments!\n");
-                return;
-            }
-
-            System.out.println("");
-            
-        } catch (IOException error) {
-            System.out.println("Error occurred retrieving your appointment: ");
-            error.printStackTrace();
-        }
+    public void setName(String name) {
+        this.name = name;
     }
 
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public ContactInfo getContactInfo() {
+        return contactInfo;
+    }
+
+    public void setContactInfo(ContactInfo contactInfo) {
+        this.contactInfo = contactInfo;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean login(String password) {
+        return this.password.equals(password);
+    }
+
+/*    public static Patient fromCSV(String csv) {
+        String[] parts = csv.split(",");
+        String patientID = parts[0];
+        String name = parts[1];
+        Date dateOfBirth = new Date(Long.parseLong(parts[2]));
+        String gender = parts[3];
+        ContactInfo contactInfo = new ContactInfo(parts[4], parts[5], parts[6]); // Assuming a constructor that takes address, phone, and email
+        String password = parts[7];
+        return new Patient(patientID, name, dateOfBirth, gender, contactInfo, password);
+    }*/
 }

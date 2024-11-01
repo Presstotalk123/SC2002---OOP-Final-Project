@@ -1,7 +1,9 @@
-package hms;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.io.BufferedReader;
 
 public class Pharmacist extends User {
 
@@ -15,9 +17,28 @@ public class Pharmacist extends User {
      * @return a list of AppointmentOutcomeRecord objects.
      */
     public List<AppointmentOutcomeRecord> viewAppointmentOutcomeRecords() {
-        // In a real implementation, this would retrieve records from a database
-        // Here, we'll return an empty list as a placeholder
-        return new ArrayList<>();
+        List<AppointmentOutcomeRecord> records = new ArrayList<>();
+        String filePath = "appointment_outcome_records.csv"; // Path to your CSV file
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                // Assuming the CSV columns are in the order: appointmentID, dateOfAppointment, serviceType, prescribedMedications, consultationNotes
+                String appointmentID = values[0];
+                Date dateOfAppointment = new Date(values[1]); // You may need to parse the date string appropriately
+                String serviceType = values[2];
+                List<Prescription> prescribedMedications = parsePrescriptions(values[3]); // Implement parsePrescriptions method
+                String consultationNotes = values[4];
+
+                AppointmentOutcomeRecord record = new AppointmentOutcomeRecord(appointmentID, dateOfAppointment, serviceType, prescribedMedications, consultationNotes);
+                records.add(record);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return records;
     }
 
     /**
@@ -59,7 +80,7 @@ public class Pharmacist extends User {
         ReplenishmentRequest request = new ReplenishmentRequest(
                 generateRequestID(), medicationName, quantity, "Pending");
         // Submit the request (e.g., save to database or notify administrator)
-        submitRequest(request);
+        request.saveToCSV("replenishment_requests.csv");
     }
 
     // Helper methods (placeholders for actual implementations)
@@ -71,7 +92,9 @@ public class Pharmacist extends User {
 
     private Inventory getInventory() {
         // Placeholder method to retrieve the inventory
-        return new Inventory();
+        Inventory inventory = new Inventory();
+        inventory.loadFromCSV("inventory.csv");
+        return inventory;
     }
 
     private String generateRequestID() {
@@ -79,14 +102,22 @@ public class Pharmacist extends User {
         return "REQ" + System.currentTimeMillis();
     }
 
-    private void submitRequest(ReplenishmentRequest request) {
-        // Placeholder method to submit the replenishment request
-        // In a real implementation, this would save the request to a database or notify an administrator
+    private List<Prescription> parsePrescriptions(String csv) {
+        List<Prescription> prescriptions = new ArrayList<>();
+        String[] items = csv.split(";");
+        for (String item : items) {
+            String[] parts = item.split(":");
+            String prescriptionID = parts[0];
+            String medicationName = parts[1];
+            String status = parts[2];
+            prescriptions.add(new Prescription(prescriptionID, medicationName, status));
+        }
+        return prescriptions;
     }
 
     // Implement abstract methods from User if any (e.g., login, changePassword)
     @Override
-    public boolean login(String password) {
+    public boolean login(String Username) {
         // Implement login logic here
         return this.password.equals(password);
     }

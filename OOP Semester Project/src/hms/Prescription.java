@@ -1,5 +1,3 @@
-package hms;
-
 public class Prescription {
     private String prescriptionID;
     private String medicationName;
