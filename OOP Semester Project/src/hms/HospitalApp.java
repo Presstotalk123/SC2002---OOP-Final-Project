@@ -1,18 +1,11 @@
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.Date;
 class HospitalApp {
     public static void main(String[] args) {
-        List<Doctor> doctorList = new ArrayList<>();
-        public Doctor getDoctorByUsername(String username) {
-            for (Doctor doctor : doctorList) {
-                if (doctor.getDoctorUsername().equals(username)) {
-                    return doctor;
-                }
-            }
-            return null;
-        }
         System.out.println("Welcome to the Hospital");
         System.out.println("LOGIN");
         System.out.println("1. Login\n2. Sign up");
@@ -23,8 +16,12 @@ class HospitalApp {
             choice = sc.nextInt();
             switch (choice) {
                 case 1: {
-                    Doctor doctor = getDoctorByUsername(username);
-                    if (doctor != null && doctor.login(password)) {
+                    System.out.println("Enter your username:");
+                    String username = sc.next();
+                    System.out.println("Enter your password:");
+                    String password = sc.next();
+                    Login login=new Login();
+                    if (login.login(username, password, "Doctor.csv")) {
                         System.out.println("Login successful");
                     } else {
                         System.out.println("Login failed");
@@ -36,16 +33,11 @@ class HospitalApp {
                     String username = sc.next();
                     System.out.println("Enter your password:");
                     String password = sc.next();
-                    try {
-                        Class<?> clazz = Class.forName("Patient");
-                        Patient patient = (Patient) clazz.getDeclaredConstructor(String.class).newInstance(username);
-                        if (patient.login(password)) {
-                            System.out.println("Login successful");
-                        } else {
-                            System.out.println("Login failed");
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    Login login=new Login();
+                    if (login.login(username, password, "Patient.csv")) {
+                        System.out.println("Login successful");
+                    } else {
+                        System.out.println("Login failed");
                     }
                     break;
                 }
@@ -54,16 +46,11 @@ class HospitalApp {
                     String username = sc.next();
                     System.out.println("Enter your password:");
                     String password = sc.next();
-                    try {
-                        Class<?> clazz = Class.forName("Administrator");
-                        Administrator admin = (Administrator) clazz.getDeclaredConstructor(String.class).newInstance(username);
-                        if (admin.login(password)) {
-                            System.out.println("Login successful");
-                        } else {
-                            System.out.println("Login failed");
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    Login login=new Login();
+                    if (login.login(username, password, "Admin.csv")) {
+                        System.out.println("Login successful");
+                    } else {
+                        System.out.println("Login failed");
                     }
                     break;
                 }
@@ -72,16 +59,11 @@ class HospitalApp {
                     String username = sc.next();
                     System.out.println("Enter your password:");
                     String password = sc.next();
-                    try {
-                        Class<?> clazz = Class.forName("Administrator");
-                        Pharmacist pharma = (Pharmacist) clazz.getDeclaredConstructor(String.class).newInstance(username);
-                        if (pharma.login(password)) {
-                            System.out.println("Login successful");
-                        } else {
-                            System.out.println("Login failed");
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    Login login=new Login();
+                    if (login.login(username, password, "Pharmacist.csv")) {
+                        System.out.println("Login successful");
+                    } else {
+                        System.out.println("Login failed");
                     }
                     break;
                 }
@@ -106,10 +88,7 @@ class HospitalApp {
                     String username=sc.next();
                     System.out.println("Enter your password:");
                     String password=sc.next();
-                    Class<?> clazz = Class.forName(className);
-
-                    // Create a new instance of the class
-                    Object obj = clazz.getDeclaredConstructor().newInstance();
+                   User user=new Doctor(username,password,name,DOB,)
 
             }
         }
