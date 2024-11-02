@@ -39,23 +39,34 @@ public class ReplenishmentRequest {
         this.status = status;
     }
 
-    /**
-     * Saves the replenishment request to a CSV file.
-     *
-     * @param filePath the path of the CSV file.
-     */
     public void saveToCSV(String filePath) {
-        try (FileWriter fileWriter = new FileWriter(filePath, true);
-             PrintWriter printWriter = new PrintWriter(fileWriter)) {
-            printWriter.printf("%s,%s,%d,%s%n",
-                    requestID,
-                    medicationName,
-                    quantity,
-                    status);
-        } catch (IOException e) {
-            e.printStackTrace();
+    // Create a File object for the CSV file
+    File file = new File(filePath);
+
+    // Check if the file exists; if not, create it
+    try {
+        if (file.createNewFile()) {
+            System.out.println("CSV file created: " + file.getName());
+        } else {
+            System.out.println("CSV file already exists.");
         }
+    } catch (IOException e) {
+        System.out.println("An error occurred while creating the file.");
+        e.printStackTrace();
     }
+
+    // Append the replenishment request to the CSV file
+    try (FileWriter fileWriter = new FileWriter(filePath, true);
+         PrintWriter printWriter = new PrintWriter(fileWriter)) {
+        printWriter.printf("%s,%s,%d,%s%n",
+                requestID,
+                medicationName,
+                quantity,
+                status);
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+}
 
     /**
      * Loads replenishment requests from a CSV file.

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.io.BufferedReader;
+import java.util.Scanner;
+import.java.io.BufferedWriter;
 
 public class Pharmacist extends User {
 
@@ -11,91 +13,169 @@ public class Pharmacist extends User {
         super(hospitalID, password, name, dateOfBirth, gender, contactInfo);
     }
 
-    /**
-     * Views all appointment outcome records.
-     *
-     * @return a list of AppointmentOutcomeRecord objects.
-     */
-    public List<AppointmentOutcomeRecord> viewAppointmentOutcomeRecords() {
-        List<AppointmentOutcomeRecord> records = new ArrayList<>();
-        String filePath = "appointment_outcome_records.csv"; // Path to your CSV file
+    // Main menu method for Pharmacist
+    public void showMenu() {
+        Scanner scanner = new Scanner(System.in);
+        boolean exit = false;
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-                // Assuming the CSV columns are in the order: appointmentID, dateOfAppointment, serviceType, prescribedMedications, consultationNotes
-                String appointmentID = values[0];
-                Date dateOfAppointment = new Date(values[1]); // You may need to parse the date string appropriately
-                String serviceType = values[2];
-                List<Prescription> prescribedMedications = parsePrescriptions(values[3]); // Implement parsePrescriptions method
-                String consultationNotes = values[4];
+        while (!exit) {
+    System.out.println("\nPharmacist Menu:");
+    System.out.println("1. View Appointment Outcome Record");
+    System.out.println("2. Update Prescription Status");
+    System.out.println("3. View Medication Inventory");
+    System.out.println("4. Submit Replenishment Request");
+    System.out.println("5. Logout");
+    System.out.print("Select an option: ");
 
-                AppointmentOutcomeRecord record = new AppointmentOutcomeRecord(appointmentID, dateOfAppointment, serviceType, prescribedMedications, consultationNotes);
-                records.add(record);
+    int choice = scanner.nextInt();
+    scanner.nextLine(); // Consume newline
+
+    switch (choice) {
+        case 1:
+            viewAppointmentOutcomeRecords();
+            break;
+        case 2:
+            System.out.print("Enter Appointment ID to update prescriptions: ");
+            String appointmentID = scanner.nextLine();
+            System.out.print("Enter new status (e.g., Dispensed): ");
+            String status = scanner.nextLine();
+            updatePrescriptionStatus(appointmentID, status);
+            break;
+        case 3:
+            displayMedicationInventory(); 
+            break;
+        case 4:
+            System.out.print("Enter Medication Name: ");
+            String medicationName = scanner.nextLine();
+            System.out.print("Enter Quantity: ");
+            int quantity = scanner.nextInt();
+            submitReplenishmentRequest(medicationName, quantity);
+            break;
+        case 5:
+            exit = true;
+            System.out.println("Logging out...");
+            break;
+        default:
+            System.out.println("Invalid choice. Please try again.");
+    }
+}
+
+        scanner.close();
+    }
+
+    // Existing methods...
+public List<AppointmentOutcomeRecord> getAllAppointmentOutcomeRecords() {
+    List<AppointmentOutcomeRecord> records = new ArrayList<>();
+    String filePath = "appointment_outcome_records.csv"; // Path to your CSV file
+
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] values = line.split(",");
+            String appointmentID = values[0];
+            Date dateOfAppointment = new Date(values[1]); // You may need to parse the date string appropriately
+            String serviceType = values[2];
+            List<Prescription> prescribedMedications = parsePrescriptions(values[3]); // Implement parsePrescriptions method
+            String consultationNotes = values[4];
+
+            AppointmentOutcomeRecord record = new AppointmentOutcomeRecord(appointmentID, dateOfAppointment, serviceType, prescribedMedications, consultationNotes);
+            records.add(record);
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+
+    return records;
+}
+
+    // New method to update prescription status based on appointment ID
+
+public void updatePrescriptionStatus(String appointmentID, String medicationName, String status) {
+    // Fetch all appointment outcome records
+    List<AppointmentOutcomeRecord> records = getAllAppointmentOutcomeRecords();
+    boolean found = false;
+
+    for (AppointmentOutcomeRecord record : records) {
+        if (record.getAppointmentID().equals(appointmentID)) {
+            // Update the status of the prescribed medication
+            List<Prescription> prescriptions = record.getPrescribedMedications();
+            for (Prescription prescription : prescriptions) {
+                if (prescription.getMedicationName().equals(medicationName)) {
+                    prescription.updateStatus(status); // Update the status
+                    found = true;
+                    break; // Exit the loop as we found the prescription
+                }
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return records;
-    }
-
-    /**
-     * Updates the status of a prescription.
-     *
-     * @param prescriptionID the ID of the prescription to update.
-     * @param status         the new status of the prescription.
-     */
-    public void updatePrescriptionStatus(String prescriptionID, String status) {
-        // Find the prescription by ID
-        Prescription prescription = findPrescriptionByID(prescriptionID);
-        if (prescription != null) {
-            prescription.updateStatus(status);
-            // Save the updated prescription to the database (not implemented)
-        } else {
-            System.out.println("Prescription not found.");
+            break; // Exit the outer loop as well
         }
     }
 
-    /**
-     * Views the current medication inventory.
-     *
-     * @return a list of Medication objects.
-     */
-    public List<Medication> viewMedicationInventory() {
-        // Retrieve the inventory (placeholder implementation)
-        Inventory inventory = getInventory();
-        return inventory.getMedications();
+    // If a prescription was found and updated, save the records
+    if (found) {
+        saveUpdatedRecordsToCSV(records);
+        System.out.println("Prescription status updated successfully.");
+    } else {
+        System.out.println("Prescription not found for the given appointment ID and medication name.");
     }
+}
 
-    /**
-     * Submits a replenishment request for a medication.
-     *
-     * @param medicationName the name of the medication.
-     * @param quantity       the quantity to request.
-     */
-    public void submitReplenishmentRequest(String medicationName, int quantity) {
-        // Create a new replenishment request
-        ReplenishmentRequest request = new ReplenishmentRequest(
-                generateRequestID(), medicationName, quantity, "Pending");
-        // Submit the request (e.g., save to database or notify administrator)
-        request.saveToCSV("replenishment_requests.csv");
+private void saveUpdatedRecordsToCSV(List<AppointmentOutcomeRecord> records) {
+    String filePath = "appointment_outcome_records.csv";
+
+    try (BufferedWriter bw = new BufferedWriter(new FileWriter(filePath))) {
+        for (AppointmentOutcomeRecord record : records) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(record.getAppointmentID()).append(",")
+              .append(record.getDateOfAppointment().getTime()).append(",") // Convert date to long
+              .append(record.getServiceType()).append(",")
+              .append(serializePrescriptions(record.getPrescribedMedications())).append(",")
+              .append(record.getConsultationNotes());
+            bw.write(sb.toString());
+            bw.newLine();
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
     }
+}
 
-    // Helper methods (placeholders for actual implementations)
-
-    private Prescription findPrescriptionByID(String prescriptionID) {
-        // Placeholder method to find a prescription by ID
-        return null; // Should return a Prescription object if found
+private String serializePrescriptions(List<Prescription> prescriptions) {
+    StringBuilder sb = new StringBuilder();
+    for (Prescription prescription : prescriptions) {
+        sb.append(prescription.getMedicationName()).append(":").append(prescription.getStatus()).append(";");
     }
+    return sb.toString();
+}
 
-    private Inventory getInventory() {
-        // Placeholder method to retrieve the inventory
-        Inventory inventory = new Inventory();
-        inventory.loadFromCSV("inventory.csv");
-        return inventory;
+
+
+public void displayMedicationInventory() {
+    Inventory inventory = new Inventory();
+    inventory.loadFromCSV("inventory.csv"); // Load the inventory from the CSV file
+
+    List<Medication> medications = inventory.getMedications();
+    
+    if (medications.isEmpty()) {
+        System.out.println("No medications in inventory.");
+    } else {
+        System.out.println("Medication Inventory:");
+        for (Medication med : medications) {
+            System.out.printf("Name: %s, Quantity: %d%n", med.getMedicationName(), med.getStockLevel());
+        }
     }
+}
+
+
+
+// In the submitReplenishmentRequest method
+public void submitReplenishmentRequest(String medicationName, int quantity) {
+    // Create a new replenishment request
+    ReplenishmentRequest request = new ReplenishmentRequest(
+            generateRequestID(), medicationName, quantity, "Pending");
+    // Submit the request (this will also create the file if it doesn't exist)
+    request.saveToCSV("replenishment_requests.csv");
+}
+
+
 
     private String generateRequestID() {
         // Generates a unique request ID
@@ -113,18 +193,5 @@ public class Pharmacist extends User {
             prescriptions.add(new Prescription(prescriptionID, medicationName, status));
         }
         return prescriptions;
-    }
-
-    // Implement abstract methods from User if any (e.g., login, changePassword)
-    @Override
-    public boolean login(String Username) {
-        // Implement login logic here
-        return this.password.equals(password);
-    }
-
-    @Override
-    public void changePassword(String newPassword) {
-        // Implement password change logic here
-        this.password = newPassword;
     }
 }
