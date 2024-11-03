@@ -8,6 +8,11 @@ public class Pharmacist extends Staff {
 
     public Pharmacist(Scanner scanner) {
         super(scanner, "pharmacist");
+        try {
+            super.save();
+        } catch (IOException error) {
+            System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
+        }
     }
 
     public Pharmacist(String id, String name, String password) throws IOException {
@@ -16,14 +21,14 @@ public class Pharmacist extends Staff {
 
     public boolean eventLoop(Scanner scanner) {
         System.out.print("""
-            Pharmacist Menu:
-            1. View Appointment Outcome Record
-            2. Update Prescription Status
-            3. View Medication Inventory
-            4. Submit Replenishment Request
-            5. Log Out
-            Enter your choice:""");
-        
+                Pharmacist Menu:
+                1. View Appointment Outcome Record
+                2. Update Prescription Status
+                3. View Medication Inventory
+                4. Submit Replenishment Request
+                5. Log Out
+                Enter your choice:""");
+
         int choice = scanner.nextInt();
         scanner.nextLine(); // Consume newline
 
@@ -45,15 +50,16 @@ public class Pharmacist extends Staff {
                 String prescriptionId = scanner.nextLine();
                 // Why are you asking for medication name?
                 // Also Prescriptions should be updated individually, not all at once.
-                // System.out.print("Enter Medication Name to update: "); // Ask for medication name
+                // System.out.print("Enter Medication Name to update: "); // Ask for medication
+                // name
                 // String medicationName = scanner.nextLine(); // Collect medication name
                 try {
                     while (true) {
                         System.out.print("Enter new status (e.g., Pending/Dispensed): ");
                         String status = scanner.nextLine();
-                        if (status.toLowerCase() == "pending") {
+                        if (status.toLowerCase().equals("pending")) {
                             updatePrescriptionStatus(prescriptionId, PrescriptionStatus.Pending);
-                        } else if (status.toLowerCase() == "dispensed") {
+                        } else if (status.toLowerCase().equals("dispensed")) {
                             updatePrescriptionStatus(prescriptionId, PrescriptionStatus.Dispensed);
                         } else {
                             System.out.println("Invalid choice! Please choosse between Pending or Dispensed");
@@ -94,11 +100,11 @@ public class Pharmacist extends Staff {
                 // Update the status of the prescribed medication
                 // List<Prescription> prescriptions = record.getPrescribedMedications();
                 // for (Prescription prescription : prescriptions) {
-                //     if (prescription.getMedicationName().equals(medicationName)) {
-                //         prescription.(status); // Update the status
-                //         found = true;
-                //         break; // Exit the loop as we found the prescription
-                //     }
+                // if (prescription.getMedicationName().equals(medicationName)) {
+                // prescription.(status); // Update the status
+                // found = true;
+                // break; // Exit the loop as we found the prescription
+                // }
                 // }
                 record.updateStatus(status);
                 record.save();
@@ -116,7 +122,7 @@ public class Pharmacist extends Staff {
 
     public void displayMedicationInventory() {
         Inventory inventory = new Inventory();
-        inventory.loadFromCSV("inventory.csv"); // Load the inventory from the CSV file
+        inventory.loadFromCSV(); // Load the inventory from the CSV file
 
         List<Medication> medications = inventory.getMedications();
 
@@ -143,6 +149,5 @@ public class Pharmacist extends Staff {
         // Generates a unique request ID
         return "REQ" + System.currentTimeMillis();
     }
-
 
 }

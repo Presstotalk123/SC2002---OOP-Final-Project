@@ -16,6 +16,11 @@ public class Patient extends User {
     // Prompt for information about patient
     public Patient(Scanner scanner) {
         super(scanner, "patient"); // Creates base User
+        try {
+            super.save();
+        } catch (IOException error) {
+            System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
+        }
         this.patientRecord = new MedicalRecords(scanner, super.id, super.name); // Create Patient Medical Record
     }
 

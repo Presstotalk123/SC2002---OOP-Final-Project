@@ -9,11 +9,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-enum PrescriptionStatus {
-    Pending,
-    Dispensed
-}
-
 public class Prescription {
     private String id;
     private String medicationName;
@@ -49,8 +44,8 @@ public class Prescription {
     }
 
     public void save() throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get("./data/prescriptions.csv"));
-        FileOutputStream output = new FileOutputStream("./data/prescriptions.csv");
+        List<String> lines = Files.readAllLines(Paths.get("../data/prescriptions.csv"));
+        FileOutputStream output = new FileOutputStream("../data/prescriptions.csv");
 
         boolean isEntryFound = false;
         for (int i = 0; i < lines.size(); i++) {
@@ -77,12 +72,12 @@ public class Prescription {
 
     public static List<Prescription> getAll() throws IOException {
         List<Prescription> array = new ArrayList<Prescription>();
-        BufferedReader file = new BufferedReader(new FileReader("./data/prescriptions.csv"));
+        BufferedReader file = new BufferedReader(new FileReader("../data/prescriptions.csv"));
         String nextLine = file.readLine();
         while ((nextLine = file.readLine()) != null) {
             String[] prescription = nextLine.split(",");
             // TOOD: Add support for all kinds of users
-            PrescriptionStatus status = prescription[2] == "dispensed" ? PrescriptionStatus.Dispensed : PrescriptionStatus.Pending;
+            PrescriptionStatus status = prescription[2].equals("dispensed") ? PrescriptionStatus.Dispensed : PrescriptionStatus.Pending;
             array.add(new Prescription(prescription[0], prescription[1], status));
         }
         file.close();

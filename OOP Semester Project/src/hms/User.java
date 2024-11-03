@@ -35,11 +35,6 @@ public abstract class User {
     this.name = name;
     this.password = password;
     this.role = role;
-    try {
-      this.save();
-    } catch (IOException error) {
-      System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
-    }
 
   }
 
@@ -64,8 +59,12 @@ public abstract class User {
       // TOOD: Add support for all kinds of users
       if (role.equals("patient")) {
         userArray.add(new Patient(user[0], user[1], user[2]));
-      } else if (role.equals("admin")) {
+      } else if (role.equals("administrator")) {
         userArray.add(new Administrator(user[0], user[1], user[2]));
+      } else if (role.equals("doctor")) {
+        userArray.add(new Doctor(user[0], user[1], user[2]));
+      } else if (role.equals("pharmacist")) {
+        userArray.add(new Pharmacist(user[0], user[1], user[2]));
       }
     }
     file.close();
@@ -73,8 +72,8 @@ public abstract class User {
   }
 
   public void save() throws IOException {
-    List<String> lines = Files.readAllLines(Paths.get("./data/users.csv"));
-    FileOutputStream output = new FileOutputStream("./data/users.csv");
+    List<String> lines = Files.readAllLines(Paths.get("../data/users.csv"));
+    FileOutputStream output = new FileOutputStream("../data/users.csv");
 
     boolean isEntryFound = false;
     for (int i = 0; i < lines.size(); i++) {

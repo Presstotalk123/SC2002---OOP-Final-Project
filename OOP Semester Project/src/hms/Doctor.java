@@ -11,6 +11,11 @@ public class Doctor extends Staff {
 
     public Doctor(Scanner scanner) {
         super(scanner, "doctor");
+        try {
+            super.save();
+        } catch (IOException error) {
+            System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
+        }
     }
 
     public Doctor(String id, String name, String password) throws IOException {
@@ -35,6 +40,12 @@ public class Doctor extends Staff {
                 break;
         }
         return true;
+    }
+
+    // TODO: Add proper Doctor formatting
+    public String toString() {
+        // System.out.printf("%s - %s - %s, %s, %s", this.id, this.role, this.name, this.age, this.gender);
+        return this.id + " - Doctor - " + this.name;
     }
 
 }

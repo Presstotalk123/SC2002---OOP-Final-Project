@@ -17,13 +17,18 @@ public abstract class Staff extends User {
 
     public Staff(Scanner scanner, String role) {
         super(scanner, role);
+        try {
+            super.save();
+        } catch (IOException error) {
+            System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
+        }
         while (true) {
             System.out.print("Enter the gender for this user (male or female): ");
             String gender = scanner.nextLine().toLowerCase();
-            if (gender == "male") {
+            if (gender.equals("male")) {
                 this.gender = Gender.Male;
                 break;
-            } else if (gender == "female") {
+            } else if (gender.equals("female")) {
                 this.gender = Gender.Female;
                 break;
             } else {
@@ -69,10 +74,18 @@ public abstract class Staff extends User {
     public Staff(String id, String name, String password, String role) throws IOException {
         super(id, name, password, role);
         String[] staffData = Staff.loadStaffDataFromFile(id);
-        this.gender = staffData[1] == "male" ? Gender.Male : Gender.Female;
+        this.gender = staffData[1].equals("male") ? Gender.Male : Gender.Female;
         this.age = Integer.parseInt(staffData[2]);
         this.phoneNumber = staffData[4];
         this.emailAddress = staffData[5];
+    }
+
+    public String getRole() {
+        return this.role;
+    }
+
+    public String getGender() {
+        return this.gender.toString().toLowerCase();
     }
 
     public void updatePhoneNumber(String phoneNumber) throws Exception {
@@ -91,10 +104,14 @@ public abstract class Staff extends User {
         }
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void save() throws IOException {
         // staff.csv: id,gender,age,role,phoneNumber,email
-        List<String> lines = Files.readAllLines(Paths.get("./data/staff.csv"));
-        FileOutputStream output = new FileOutputStream("./data/staff.csv");
+        List<String> lines = Files.readAllLines(Paths.get("../data/staff.csv"));
+        FileOutputStream output = new FileOutputStream("../data/staff.csv");
 
         boolean isEntryFound = false;
         for (int i = 0; i < lines.size(); i++) {
@@ -140,7 +157,7 @@ public abstract class Staff extends User {
         }
 
         file.close();
-        throw new IOException("Missing or Invalid Patient Data found in patient_record.csv for patient with ID: " + id);
+        throw new IOException("Missing or Invalid Patient Data found in staff.csv for patient with ID: " + id);
     }
 
     // public String getId() {

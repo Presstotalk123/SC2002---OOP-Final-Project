@@ -1,3 +1,5 @@
 id,name,password,role
 1,Mikko,password,patient
-2,Beth,password,admin
+2,Beth,password,administrator
+56,Max,maxxy,doctor
+296,Gina,gina,pharmacist

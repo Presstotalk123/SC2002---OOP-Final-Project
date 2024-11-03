@@ -42,10 +42,10 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         while (true) {
             System.out.print("Enter the gender for this user (male or female): ");
             String gender = scanner.nextLine().toLowerCase();
-            if (gender == "male") {
+            if (gender.equals("male")) {
                 this.gender = Gender.Male;
                 break;
-            } else if (gender == "female") {
+            } else if (gender.equals("female")) {
                 this.gender = Gender.Female;
                 break;
             } else {
@@ -89,7 +89,7 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         this.id = id;
         this.name = record[1];
         this.dateOfBirth = record[2];
-        this.gender = record[3] == "male" ? Gender.Male : Gender.Female;
+        this.gender = record[3].equals("male") ? Gender.Male : Gender.Female;
         this.phoneNumber = record[4];
         this.emailAddress = record[5];
         this.bloodType = record[6];
@@ -126,7 +126,7 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         }
 
         file.close();
-        throw new IOException("Missing or Invalid Patient Data found in patient_record.csv for patient with ID: " + id);
+        throw new IOException("Missing or Invalid Patient Data found in MedicalRecords.csv for patient with ID: " + id);
     }
 
     // From MedicalRecordPatientAccess

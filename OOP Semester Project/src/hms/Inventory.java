@@ -69,9 +69,9 @@ public class Inventory {
      *
      * @param filePath the path of the CSV file.
      */
-    public void loadFromCSV(String filePath) {
+    public void loadFromCSV() {
         medications.clear();
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("../data/inventory.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");

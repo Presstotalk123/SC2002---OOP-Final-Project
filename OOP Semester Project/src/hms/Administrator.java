@@ -14,6 +14,17 @@ public class Administrator extends User {
 
     public Administrator(Scanner scanner) {
         super(scanner, "administrator");
+        try {
+            super.save();
+        } catch (IOException error) {
+            System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
+        }
+        staffList = new ArrayList<>();
+        appointmentList = new ArrayList<>();
+        inventory = new Inventory();
+        loadStaffData();
+        loadAppointmentData();
+        loadInventoryData();
     }
 
     public Administrator(String id, String name, String password) {
@@ -66,8 +77,6 @@ public class Administrator extends User {
         }
         System.out.println("Press Enter to return to the admin menu.");
 
-        // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
-        // leak
         scanner.nextLine(); // Wait for user to press Enter
     }
 
@@ -106,17 +115,16 @@ public class Administrator extends User {
     }
 
     private void addStaff(Scanner scanner) {
-        System.out.println("Enter Staff ID:");
-        String id = scanner.nextLine();
-        System.out.println("Enter Staff Name:");
-        String name = scanner.nextLine();
         System.out.println("Enter Staff Role:");
         String role = scanner.nextLine();
-        System.out.println("Enter Staff Gender:");
-        String gender = scanner.nextLine();
 
-        if (role == "doctor") {
-            staffList.add(new Doctor(id, name, role, gender));
+        if (role.equals("doctor")) {
+            staffList.add(new Doctor(scanner));
+        } else if (role.equals("pharmacist")) {
+            staffList.add(new Pharmacist(scanner));
+        } else {
+            System.out.println("Invalid staff role.");
+            return;
         }
 
         saveStaffData(); // Save changes to the file
@@ -127,21 +135,47 @@ public class Administrator extends User {
         System.out.println("Enter Staff ID to update:");
         String id = scanner.nextLine();
         for (Staff staff : staffList) {
-            if (staff.getId().equals(id)) {
+            if (staff.id.equals(id)) {
                 System.out.println("Updating Staff: " + staff);
-                System.out.println("Enter new Staff Name (or leave blank to keep current):");
+
+                // TODO: Confirm this. Are "role" and "gender" supposed to be updatable?
+                System.out.print("Enter new Staff Name (or leave blank to keep current): ");
                 String newName = scanner.nextLine();
-                System.out.println("Enter new Staff Role (or leave blank to keep current):");
-                String newRole = scanner.nextLine();
-                System.out.println("Enter new Staff Gender (or leave blank to keep current):");
-                String newGender = scanner.nextLine();
+                // System.out.println("Enter new Staff Role (or leave blank to keep current):");
+                // String newRole = scanner.nextLine();
+                // System.out.println("Enter new Staff Gender (or leave blank to keep
+                // current):"); // We being progressive fr
+                // String newGender = scanner.nextLine();
+                while (true) {
+                    System.out.print("Enter new Staff Phone Number (or leave blank to keep current): ");
+                    String phoneNumber = scanner.nextLine();
+                    if (phoneNumber.isEmpty())
+                        break;
+                    try {
+                        staff.updatePhoneNumber(phoneNumber);
+                    } catch (Exception error) {
+                        System.out.println(error.getMessage());
+                    }
+                }
+
+                while (true) {
+                    System.out.print("Enter new Staff Email Address (or leave blank to keep current): ");
+                    String email = scanner.nextLine();
+                    if (email.isEmpty())
+                        break;
+                    try {
+                        staff.updateEmailAddress(email);
+                    } catch (Exception error) {
+                        System.out.println(error.getMessage());
+                    }
+                }
 
                 if (!newName.isEmpty())
                     staff.setName(newName);
-                if (!newRole.isEmpty())
-                    staff.setRole(newRole);
-                if (!newGender.isEmpty())
-                    staff.setGender(newGender);
+                // if (!newRole.isEmpty())
+                // staff.setRole(newRole);
+                // if (!newGender.isEmpty())
+                // staff.setGender(newGender);
 
                 saveStaffData(); // Save changes to the file
                 System.out.println("Staff member updated successfully.");
@@ -155,7 +189,7 @@ public class Administrator extends User {
         System.out.println("Enter Staff ID to remove:");
         String id = scanner.nextLine();
         for (int i = 0; i < staffList.size(); i++) {
-            if (staffList.get(i).getId().equals(id)) {
+            if (staffList.get(i).id.equals(id)) {
                 staffList.remove(i);
                 saveStaffData(); // Save changes to the file
                 System.out.println("Staff member removed successfully.");
@@ -204,8 +238,6 @@ public class Administrator extends User {
             System.out.println(appointment);
         }
         System.out.println("Press Enter to return to the admin menu.");
-        // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
-        // leak
         scanner.nextLine(); // Wait for user to press Enter
     }
 
@@ -249,10 +281,9 @@ public class Administrator extends User {
 
     private void viewInventory(Scanner scanner) {
         System.out.println("Current Inventory:");
-        inventory.getItems().forEach(System.out::println);
+        inventory.loadFromCSV();
+        inventory.getMedications().forEach(System.out::println);
         System.out.println("Press Enter to return to the Manage Inventory menu.");
-        // From Mikko: Changed this as new Scanner(System.in).nextLine() causes a memory
-        // leak
         scanner.nextLine(); // Wait for user to press Enter
     }
 
@@ -263,7 +294,7 @@ public class Administrator extends User {
         int stock = scanner.nextInt();
         System.out.println("Enter Low Stock Alert Level:");
         int lowStockLevel = scanner.nextInt();
-        inventory.addItem(new InventoryItem(name, stock, lowStockLevel));
+        inventory.addMedication(new InventoryItem(name, stock, lowStockLevel));
         saveInventoryData(); // Save changes to the file
         System.out.println("Inventory item added successfully.");
     }
@@ -316,15 +347,28 @@ public class Administrator extends User {
     }
 
     private void loadStaffData() {
-        try (BufferedReader br = new BufferedReader(new FileReader("../data/staff_data.csv"))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] data = line.split(",");
-                staffList.add(new Staff(data[0], data[1], data[2], data[3]));
+
+        try {
+            this.staffList.clear();
+
+            BufferedReader file = new BufferedReader(new FileReader("../data/users.csv"));
+            String nextLine = file.readLine();
+            while ((nextLine = file.readLine()) != null) {
+                String[] user = nextLine.split(",");
+                String role = user[3];
+
+                // Ignore all other types of users. Only handle Doctor and Pharmacist
+                if (role.equals("doctor")) {
+                    this.staffList.add(new Doctor(user[0], user[1], user[2]));
+                } else if (role.equals("pharmacist")) {
+                    this.staffList.add(new Pharmacist(user[0], user[1], user[2]));
+                }
             }
-        } catch (IOException e) {
-            System.out.println("Error loading staff data: " + e.getMessage());
+            file.close();
+        } catch (IOException error) {
+            System.out.println("Error loading staff data: " + error.getMessage());
         }
+
     }
 
     private void loadAppointmentData() {
@@ -345,21 +389,31 @@ public class Administrator extends User {
     }
 
     private void saveStaffData() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("staff_data.csv"))) {
-            for (Staff staff : staffList) {
-                bw.write(staff.getId() + "," + staff.getName() + "," + staff.getRole() + "," + staff.getGender());
-                bw.newLine();
+        for (Staff staff : staffList) {
+            try {
+                staff.save();
+            } catch (IOException e) {
+                System.out.println("Error saving staff data: " + e.getMessage());
             }
-        } catch (IOException e) {
-            System.out.println("Error saving staff data: " + e.getMessage());
         }
+        // try (BufferedWriter bw = new BufferedWriter(new
+        // FileWriter("staff_data.csv"))) {
+        // for (Staff staff : staffList) {
+        // bw.write(staff.id + "," + staff.name + "," + staff.getRole() + "," +
+        // staff.getGender());
+        // bw.newLine();
+        // }
+        // } catch (IOException e) {
+        // System.out.println("Error saving staff data: " + e.getMessage());
+        // }
     }
 
     private void saveInventoryData() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("inventory_data.csv"))) {
             for (InventoryItem item : inventory.getItems()) {
-                bw.write(item.getName() + "," + item.getStock() + "," + item.getLowStockLevel());
-                bw.newLine();
+            bw.write(item.getName() + "," + item.getStock() + "," +
+            item.getLowStockLevel());
+            bw.newLine();
             }
         } catch (IOException e) {
             System.out.println("Error saving inventory data: " + e.getMessage());
