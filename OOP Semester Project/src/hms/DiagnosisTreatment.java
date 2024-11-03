@@ -1,3 +1,5 @@
+package hms;
+
 import java.util.Date;
 
 public class DiagnosisTreatment {

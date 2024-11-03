@@ -1,3 +1,5 @@
+package hms;
+
 public class Medication {
     private String medicationName;
     private int stockLevel;

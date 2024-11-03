@@ -1,3 +1,10 @@
+package hms;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -54,6 +61,39 @@ public class AppointmentOutcomeRecord {
 
     public void setConsultationNotes(String consultationNotes) {
         this.consultationNotes = consultationNotes;
+    }
+
+    // Taken from Pharmacist
+    public static List<AppointmentOutcomeRecord> getAllRecords() {
+        List<AppointmentOutcomeRecord> records = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader("./data/appointment_outcome_records.csv"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values.length < 5) {
+                    System.err.println("Skipping malformed record: " + line);
+                    continue; // Skip malformed records
+                }
+                String appointmentID = values[0];
+                Date dateOfAppointment = new Date(Long.parseLong(values[1])); // You may need to parse the date string
+                                                                              // appropriately
+                String serviceType = values[2];
+                List<String> prescriptionIds = Arrays.asList(values[3].split(";"));
+                List<Prescription> prescribedMedications = Prescription.getAll();
+                prescribedMedications.removeIf(p -> prescriptionIds.contains(p.getID())); // Implement
+                                                                                          // parsePrescriptions method
+                String consultationNotes = values[4];
+
+                AppointmentOutcomeRecord record = new AppointmentOutcomeRecord(appointmentID, dateOfAppointment,
+                        serviceType, prescribedMedications, consultationNotes);
+                records.add(record);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return records;
     }
 
     @Override

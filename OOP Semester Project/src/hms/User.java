@@ -65,7 +65,7 @@ public abstract class User {
       if (role.equals("patient")) {
         userArray.add(new Patient(user[0], user[1], user[2]));
       } else if (role.equals("admin")) {
-        userArray.add(new HMSAdmin(user[0], user[1], user[2]));
+        userArray.add(new Administrator(user[0], user[1], user[2]));
       }
     }
     file.close();

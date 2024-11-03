@@ -1,11 +1,11 @@
 package hms;
 
-import java.io.FileWriter;
+// import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+// import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.Date;
+// import java.util.Date;
 
 class HospitalApp {
 
@@ -105,8 +105,8 @@ class HospitalApp {
     }
 
     // Below code is an antipattern. It doesn't provide an event loop and follows
-    // bad design patterns like nested switches/if and doesn't use Java's OOP
-    // Inheritance properly.
+    // bad design patterns like improper inheritance use.
+    
     // public static void main(String[] args) {
     // System.out.println("Welcome to the Hospital");
     // System.out.println("LOGIN");
