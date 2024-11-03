@@ -8,14 +8,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import hms.Doctor;
+import hms.Gender;
 import hms.Patient;
-
-enum Gender {
-    Male,
-    Female
-}
 
 public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDoctorView {
 
@@ -29,6 +26,61 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
     private ArrayList<String> prescriptions;
     private ArrayList<String> treatments;
     private final String bloodType; // final as this field should not be updated.
+
+    public MedicalRecords(Scanner scanner, String id, String name) {
+        while (true) {
+            System.out.print("Enter the Date of Birth for this user in the format (DD-MM-YYYY): ");
+            String dateOfBirth = scanner.nextLine();
+            if (dateOfBirth.matches("(0[1-9]|[12][0-9]|3[01])\\/(0[1-9]|1[0,1,2])\\/(19|20)\\d{2}")) {
+                this.dateOfBirth = dateOfBirth;
+                break;
+            } else {
+                System.out.println("Incorrect format! Please use the format DD-MM-YYYY.");
+            }
+        }
+
+        while (true) {
+            System.out.print("Enter the gender for this user (male or female): ");
+            String gender = scanner.nextLine().toLowerCase();
+            if (gender == "male") {
+                this.gender = Gender.Male;
+                break;
+            } else if (gender == "female") {
+                this.gender = Gender.Female;
+                break;
+            } else {
+                System.out.println("Invalid entry. Please specify either male or female.");
+            }
+        }
+
+        while (true) {
+            System.out.print("Enter the phone number for this user (Singaporean Numbers Only, like 91234567): ");
+            String number = scanner.nextLine().toLowerCase();
+            if (number.matches("^([0-9]{8})$") && number.length() == 8) {
+                this.phoneNumber = number;
+                break;
+            } else {
+                System.out.println("Invalid entry. Please specify in the format 91234567.");
+            }
+        }
+
+        while (true) {
+            System.out.print("Enter the email address for this user: ");
+            String email = scanner.nextLine().toLowerCase();
+            if (email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                this.emailAddress = email;
+                break;
+            } else {
+                System.out.println("Invalid entry. Please enter a valid email address.");
+            }
+        }
+
+        System.out.print("Enter the blood type for this user (Note: This cannot be changed): ");
+        String bloodType = scanner.nextLine();
+
+        this.bloodType = bloodType;
+
+    }
 
     private MedicalRecords(String id) throws IOException {
 
@@ -128,7 +180,9 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
             String[] patient = lines.get(i).split(",");
 
             if (patient.length == 7 && patient[0].equals(this.id)) {
-                String newEntry = this.id + "," + this.name + "," + this.dateOfBirth + "," + this.gender.toString().toLowerCase() + "," + this.phoneNumber + "," + this.emailAddress + "," + this.bloodType + "\n";
+                String newEntry = this.id + "," + this.name + "," + this.dateOfBirth + ","
+                        + this.gender.toString().toLowerCase() + "," + this.phoneNumber + "," + this.emailAddress + ","
+                        + this.bloodType + "\n";
                 output.write(newEntry.getBytes());
             } else {
                 String line = lines.get(i) + "\n";

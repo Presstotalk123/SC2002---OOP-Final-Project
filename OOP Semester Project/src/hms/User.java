@@ -1,25 +1,53 @@
 package hms;
-import java.io.BufferedReader;  
-import java.io.FileReader;  
-import java.io.IOException;  
+
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Random;
+
 public abstract class User {
   public String id;
   public String name;
   private String password;
+  public final String role;
 
-  // When an empty constructor is used, prompt for information.
-  // All subclasses should implement the empty constructor pattern to create new.
-  public User() {
+  // When a constructor with a scanner is used, it is expected for the subclass to
+  // prompt for data.
+  // All subclasses should implement the scanner constructor pattern to create new
+  // instance.
+  public User(Scanner scanner, String role) {
+    System.out.print("Enter a name for this new user: ");
+    String name = scanner.nextLine();
+    System.out.print("Enter a password for this new user: ");
+    String password = scanner.nextLine();
+
+    Random rand = new Random();
+
+    int id = rand.nextInt(1000); // TODO: Add exisitng ID check
+
+    this.id = Integer.toString(id);
+    this.name = name;
+    this.password = password;
+    this.role = role;
+    try {
+      this.save();
+    } catch (IOException error) {
+      System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
+    }
 
   }
 
-  public User(String id, String name, String password) {
+  public User(String id, String name, String password, String role) {
     this.id = id;
     this.name = name;
     this.password = password;
+    this.role = role;
   }
 
   public boolean login(String password) {
@@ -43,7 +71,33 @@ public abstract class User {
     file.close();
     return userArray;
   }
-  
+
+  public void save() throws IOException {
+    List<String> lines = Files.readAllLines(Paths.get("./data/users.csv"));
+    FileOutputStream output = new FileOutputStream("./data/users.csv");
+
+    boolean isEntryFound = false;
+    for (int i = 0; i < lines.size(); i++) {
+      String[] appt = lines.get(i).split(",");
+
+      if (appt.length == 6 && appt[0].equals(this.id)) {
+        String newEntry = this.id + "," + (this.name) + "," + this.password + "," + this.role + "\n";
+        output.write(newEntry.getBytes());
+        isEntryFound = true;
+      } else {
+        String line = lines.get(i) + "\n";
+        output.write(line.getBytes());
+      }
+    }
+
+    if (!isEntryFound) {
+      String newEntry = this.id + "," + (this.name) + "," + this.password + "," + this.role + "\n";
+      output.write(newEntry.getBytes());
+    }
+
+    output.close();
+  }
+
   // Return true to logout
   public abstract boolean eventLoop(Scanner scanner);
 }

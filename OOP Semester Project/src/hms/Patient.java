@@ -8,14 +8,23 @@ import hms.MedicalRecords.MedicalRecords;
 import hms.Appointments.AppointmentPatientView;
 import hms.Appointments.AppointmentStatus;
 import hms.MedicalRecords.MedicalRecordPatientView;
+
 public class Patient extends User {
     // Store MedicalRecord as a PatientView so only Patient methods are exposed.
     private MedicalRecordPatientView patientRecord;
+
+    // Prompt for information about patient
+    public Patient(Scanner scanner) {
+        super(scanner, "patient"); // Creates base User
+        this.patientRecord = new MedicalRecords(scanner, super.id, super.name); // Create Patient Medical Record
+    }
+
     public Patient(String id, String name, String password) throws IOException {
-        super(id, name, password);
+        super(id, name, password, "patient");
         MedicalRecordPatientView record = MedicalRecords.getRecord(this, id);
         this.patientRecord = record;
     }
+    
     public boolean eventLoop(Scanner scanner) {
         System.out.print("""
                 Patient Menu:
