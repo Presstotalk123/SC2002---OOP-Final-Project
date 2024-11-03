@@ -36,4 +36,13 @@ public class Prescription {
     public void updateStatus(String newStatus) {
         this.status = newStatus;
     }
+
+    @Override
+    public String toString() {
+    return "Prescription ID: " + prescriptionID +
+           ", Medication Name: " + medicationName +
+           ", Status: " + status;
+    }
+
+
 }

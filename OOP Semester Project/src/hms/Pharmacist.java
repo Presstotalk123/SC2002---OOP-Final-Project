@@ -6,6 +6,7 @@ import java.util.List;
 import java.io.BufferedReader;
 import java.util.Scanner;
 import java.io.BufferedWriter;
+import java.io.FileWriter
 
 public class Pharmacist extends User {
 
@@ -32,14 +33,25 @@ public class Pharmacist extends User {
 
     switch (choice) {
         case 1:
-            viewAppointmentOutcomeRecords();
+            List<AppointmentOutcomeRecord> records = getAllAppointmentOutcomeRecords();
+        // Print the records
+            if (records.isEmpty()) {
+            System.out.println("No appointment outcome records found.");
+            } else {
+            System.out.println("Appointment Outcome Records:");
+            for (AppointmentOutcomeRecord record : records) {
+                System.out.println(record); // Assumes AppointmentOutcomeRecord has a toString() method
+                }
+            }
             break;
         case 2:
             System.out.print("Enter Appointment ID to update prescriptions: ");
             String appointmentID = scanner.nextLine();
+            System.out.print("Enter Medication Name to update: "); // Ask for medication name
+            String medicationName = scanner.nextLine(); // Collect medication name
             System.out.print("Enter new status (e.g., Dispensed): ");
             String status = scanner.nextLine();
-            updatePrescriptionStatus(appointmentID, status);
+            updatePrescriptionStatus(appointmentID, medicationName, status);
             break;
         case 3:
             displayMedicationInventory(); 
@@ -60,7 +72,7 @@ public class Pharmacist extends User {
     }
 }
 
-        scanner.close();
+        
     }
 
     // Existing methods...

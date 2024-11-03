@@ -55,4 +55,19 @@ public class AppointmentOutcomeRecord {
     public void setConsultationNotes(String consultationNotes) {
         this.consultationNotes = consultationNotes;
     }
+
+    @Override
+    public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("Appointment ID: ").append(appointmentID).append("\n");
+    sb.append("Date of Appointment: ").append(dateOfAppointment).append("\n");
+    sb.append("Service Type: ").append(serviceType).append("\n");
+    sb.append("Prescribed Medications: ");
+    for (Prescription prescription : prescribedMedications) {
+        sb.append(prescription.toString()).append("; ");
+    }
+    sb.append("\nConsultation Notes: ").append(consultationNotes);
+    return sb.toString();
+}
+
 }
