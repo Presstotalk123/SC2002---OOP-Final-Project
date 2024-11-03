@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.io.BufferedReader;
 import java.util.Scanner;
-import.java.io.BufferedWriter;
+import java.io.BufferedWriter;
 
 public class Pharmacist extends User {
 
@@ -72,8 +72,12 @@ public List<AppointmentOutcomeRecord> getAllAppointmentOutcomeRecords() {
         String line;
         while ((line = br.readLine()) != null) {
             String[] values = line.split(",");
+            if (values.length < 5) {
+                System.err.println("Skipping malformed record: " + line);
+                continue; // Skip malformed records
+            }
             String appointmentID = values[0];
-            Date dateOfAppointment = new Date(values[1]); // You may need to parse the date string appropriately
+            Date dateOfAppointment = new Date(Long.parseLong(values[1])); // You may need to parse the date string appropriately
             String serviceType = values[2];
             List<Prescription> prescribedMedications = parsePrescriptions(values[3]); // Implement parsePrescriptions method
             String consultationNotes = values[4];
