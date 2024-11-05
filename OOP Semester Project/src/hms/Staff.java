@@ -110,8 +110,8 @@ public abstract class Staff extends User {
 
     public void save() throws IOException {
         // staff.csv: id,gender,age,role,phoneNumber,email
-        List<String> lines = Files.readAllLines(Paths.get("../data/staff.csv"));
-        FileOutputStream output = new FileOutputStream("../data/staff.csv");
+        List<String> lines = Files.readAllLines(Paths.get("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/staff.csv"));
+        FileOutputStream output = new FileOutputStream("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/staff.csv");
 
         boolean isEntryFound = false;
         for (int i = 0; i < lines.size(); i++) {
@@ -119,7 +119,7 @@ public abstract class Staff extends User {
 
             if (appt.length == 6 && appt[0].equals(this.id)) {
                 String newEntry = this.id + "," + this.gender.toString().toLowerCase() + "," + this.age + ","
-                        + this.role + "," + this.phoneNumber + "," + this.emailAddress + "\n";
+                        + this.role + "," + this.phoneNumber + "," + this.emailAddress + "NA" + "\n";
                 output.write(newEntry.getBytes());
                 isEntryFound = true;
             } else {
@@ -130,7 +130,7 @@ public abstract class Staff extends User {
 
         if (!isEntryFound) {
             String newEntry = this.id + "," + this.gender.toString().toLowerCase() + "," + this.age + ","
-                        + this.role + "," + this.phoneNumber + "," + this.emailAddress + "\n";
+                        + this.role + "," + this.phoneNumber + "," + this.emailAddress + "NA"+"\n";
             output.write(newEntry.getBytes());
         }
 
@@ -138,21 +138,21 @@ public abstract class Staff extends User {
     }
 
     private static String[] loadStaffDataFromFile(String id) throws IOException {
-        BufferedReader file = new BufferedReader(new FileReader("../data/staff.csv"));
+        BufferedReader file = new BufferedReader(new FileReader("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/staff.csv"));
 
         String nextLine = file.readLine();
         while ((nextLine = file.readLine()) != null) {
-            String[] patient = nextLine.split(",");
+            String[] staff = nextLine.split(",");
 
-            if (patient.length < 6) {
+            if (staff.length < 6) {
                 continue;
             }
 
-            String currentId = patient[0];
+            String currentId = staff[0];
 
             if (currentId.equals(id)) {
                 file.close();
-                return patient;
+                return staff;
             }
         }
 

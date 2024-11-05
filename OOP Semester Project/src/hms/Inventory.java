@@ -19,8 +19,9 @@ public class Inventory {
         medications.add(medication);
     }
 
-    public void removeMedication(String medicationName) {
+    public boolean removeMedication(String medicationName) {
         medications.removeIf(med -> med.getMedicationName().equals(medicationName));
+        return true;
     }
 
     public void updateStockLevel(String medicationName, int quantity) {
@@ -44,6 +45,8 @@ public class Inventory {
     public List<Medication> getMedications() {
         return medications;
     }
+    // Inventory.java
+
 
     /**
      * Saves the inventory to a CSV file.
@@ -64,14 +67,10 @@ public class Inventory {
         }
     }
 
-    /**
-     * Loads the inventory from a CSV file.
-     *
-     * @param filePath the path of the CSV file.
-     */
+
     public void loadFromCSV() {
         medications.clear();
-        try (BufferedReader br = new BufferedReader(new FileReader("../data/inventory.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/inventory.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] values = line.split(",");

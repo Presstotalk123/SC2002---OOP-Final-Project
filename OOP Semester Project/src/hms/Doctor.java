@@ -1,13 +1,22 @@
 package hms;
 
+
+import hms.Appointments.Appointment;
+import hms.Appointments.AppointmentStatus;
+
 import java.io.*;
-import java.util.Scanner;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 public class Doctor extends Staff {
 
+
     // I removed this as I'm not sure what your intention for specialisation is.
     // It doesn't add any functionality so idk what you're planning to do with it.
-    // private String specialisation;
+    private String specialisation;
+
 
     public Doctor(Scanner scanner) {
         super(scanner, "doctor");
@@ -26,13 +35,90 @@ public class Doctor extends Staff {
     public boolean eventLoop(Scanner scanner) {
         System.out.print("""
                 Doctor Menu:
-                1. ...
+                1. View Patient Medical Records
+                2. Update Patient Medical Records
+                3. View Personal Schedule
+                4. Set Availability for Appointments
+                5. Accept or Decline Appointment Requests
+                6. Record Appointment Outcome\s
                 7. Log Out
                 Enter your choice:""");
 
         int choice = scanner.nextInt();
         scanner.nextLine();
         switch (choice) {
+            case 1:
+                System.out.print("Enter the patient ID: ");
+                String patientId = scanner.nextLine();
+                try {
+                    List<String[]> medicalRecords = viewMedicalRecord(patientId);
+                    for (String[] record : medicalRecords) {
+                        System.out.println(String.join(", ", record));
+                    }
+                } catch (IOException e) {
+                    System.out.println("Error reading medical records: " + e.getMessage());
+                }
+                break;
+            case 2:
+                System.out.print("Enter the patient ID: ");
+                String patientId2 = scanner.nextLine();
+                try {
+                    List<String[]> medicalRecords = viewMedicalRecord(patientId2);
+                    for (String[] record : medicalRecords) {
+                        System.out.println(String.join(", ", record));
+                    }
+                    System.out.print("Enter the index of the record to update: ");
+                    int index = scanner.nextInt();
+                    scanner.nextLine();
+                    System.out.print("Enter the updated record: ");
+                    String updatedRecord = scanner.nextLine();
+                    medicalRecords.get(index)[1] = updatedRecord;
+                    updateMedicalRecord(patientId2, medicalRecords.get(index));
+                } catch (IOException e) {
+                    System.out.println("Error reading medical records: " + e.getMessage());
+                }
+                break;
+            case 3:
+                List<Appointment> appointments = viewAppointments();
+                for (Appointment appointment : appointments) {
+                    System.out.println(appointment);
+                }
+                break;
+            case 4:
+                setAvailabilityForAppointments();
+                break;
+            case 5:
+                System.out.print("Enter the appointment ID: ");
+                String appointmentID = scanner.nextLine();
+                System.out.print("Accept (A) or Decline (D) the appointment: ");
+                String action = scanner.nextLine();
+                if (action.equalsIgnoreCase("A")) {
+                    accept(appointmentID);
+                } else if (action.equalsIgnoreCase("D")) {
+                    decline(appointmentID);
+                } else {
+                    System.out.println("Invalid action. Please enter 'A' to accept or 'D' to decline.");
+                }
+                break;
+            case 6:
+                System.out.print("Enter the appointment ID: ");
+                String appointmentID2 = scanner.nextLine();
+                System.out.print("Enter the date of the appointment: ");
+                String dateOfAppointment = scanner.nextLine();
+                System.out.print("Enter the service type: ");
+                String serviceType = scanner.nextLine();
+                System.out.print("Enter the prescribed medications (separated by commas): ");
+                String[] prescribedMedications = scanner.nextLine().split(",");
+                List<Prescription> prescriptions = new ArrayList<>();
+                for (String medication : prescribedMedications) {
+                    int prescriptionID = new Random().nextInt(9000) + 1000;
+                    String prescriptionId = Integer.toString(prescriptionID);
+                    prescriptions.add(new Prescription(prescriptionId,medication,PrescriptionStatus.Pending));
+                }
+                System.out.print("Enter the consultation notes: ");
+                String consultationNotes = scanner.nextLine();
+                recordAppointmentOutcome(appointmentID2, new Date(Long.parseLong(dateOfAppointment)), serviceType, prescriptions, consultationNotes);
+                break;
             case 7:
                 return false;
             default:
@@ -48,229 +134,245 @@ public class Doctor extends Staff {
         return this.id + " - Doctor - " + this.name;
     }
 
+
+    public List<Appointment> viewAppointments() {
+        List<Appointment> appointments = new ArrayList<>();
+        String line;
+        String separator = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/appointments.csv"))) {
+            // Skip header row
+            br.readLine();
+
+            // Process each line in the CSV file
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(separator);
+                if (values[0].equals(this.id)) {
+                    // Ensure values array has the correct length before accessing specific indices
+                    if (values.length >= 6) {
+                        String status = values[4];
+                        Optional<AppointmentStatus> apptStatus;
+                        if (status.toLowerCase().equals("confirmed"))
+                            apptStatus = Optional.of(AppointmentStatus.Confirmed);
+                        else if (status.toLowerCase().equals("cancelled"))
+                            apptStatus = Optional.of(AppointmentStatus.Cancelled);
+                        else if (status.toLowerCase().equals("completed"))
+                            apptStatus = Optional.of(AppointmentStatus.Completed);
+                        else
+                            apptStatus = Optional.empty();
+
+                        appointments.add(
+                                new Appointment(
+                                        values[0],
+                                        Optional.ofNullable(values[1].equals("") ? null : values[1]),
+                                        values[2],
+                                        apptStatus,
+                                        LocalDateTime.parse(values[5]),
+                                        Optional.ofNullable(values[3].equals("") ? null : values[3])));
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
+    public void accept(String appointmentID) {
+        List<Appointment> appointments = viewAppointments();
+        for (Appointment appointment : appointments) {
+            if (appointment.getId().equals(appointmentID)) {
+                appointment.setStatus(Optional.of(AppointmentStatus.Confirmed));
+                try {
+                    appointment.save();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+    public void decline(String appointmentID) {
+        List<Appointment> appointments = viewAppointments();
+        for (Appointment appointment : appointments) {
+            if (appointment.getId().equals(appointmentID)) {
+                appointment.setStatus(Optional.of(AppointmentStatus.Cancelled));
+                try {
+                    appointment.save();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+    public void complete(String appointmentID) {
+        List<Appointment> appointments = viewAppointments();
+        for (Appointment appointment : appointments) {
+            if (appointment.getId().equals(appointmentID)) {
+                appointment.setStatus(Optional.of(AppointmentStatus.Completed));
+                try {
+                    appointment.save();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+    }
+    public void recordAppointmentOutcome(String appointmentID, Date dateOfAppointment, String serviceType, List<Prescription> prescribedMedications, String consultationNotes) {
+        AppointmentOutcomeRecord outcomeRecord = new AppointmentOutcomeRecord(appointmentID, dateOfAppointment, serviceType, prescribedMedications, consultationNotes);
+
+        // Save the outcome record to the CSV file
+        try (PrintWriter pw = new PrintWriter(new FileWriter("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/appointment_outcome_records.csv", true))) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(outcomeRecord.getAppointmentID()).append(",");
+            sb.append(outcomeRecord.getDateOfAppointment().getTime()).append(",");
+            sb.append(outcomeRecord.getServiceType()).append(",");
+            sb.append(outcomeRecord.getPrescribedMedications().stream().map(Prescription::getID).collect(Collectors.joining(";"))).append(",");
+            sb.append(outcomeRecord.getConsultationNotes());
+            pw.println(sb.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public List<String[]> viewMedicalRecord(String patientId) throws IOException {
+        List<String[]> medicalRecords = new ArrayList<>();
+        String line;
+        String separator = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/Patient.csv"))) {
+            // Skip header row
+            br.readLine();
+
+            // Process each line in the CSV file
+            while ((line = br.readLine()) != null) {
+                String[] record = line.split(separator);
+                if (record.length > 0 && record[0].equals(patientId)) {
+                    medicalRecords.add(record);
+                }
+            }
+        }
+
+        return medicalRecords;
+    }
+    public void updateMedicalRecord(String patientId, String[] updatedRecord) throws IOException {
+        List<String[]> medicalRecords = new ArrayList<>();
+        String line;
+        String separator = ",";
+
+        try (BufferedReader br = new BufferedReader(new FileReader("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/Patient.csv"))) {
+            // Read all lines and store them in a list
+            while ((line = br.readLine()) != null) {
+                String[] record = line.split(separator);
+                if (record.length > 0 && record[0].equals(patientId)) {
+                    medicalRecords.add(updatedRecord); // Add updated record
+                } else {
+                    medicalRecords.add(record); // Add existing record
+                }
+            }
+        }
+
+        // Write the updated records back to the CSV file
+        try (PrintWriter pw = new PrintWriter(new FileWriter("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/Patient.csv"))) {
+            for (String[] record : medicalRecords) {
+                pw.println(String.join(separator, record));
+            }
+        }
+    }
+    private void viewPersonalSchedule() {
+        System.out.println("Viewing personal schedule... (placeholder)");
+    }
+
+    // Placeholder method for "Set Availability for Appointments"
+    private void setAvailabilityForAppointments() {
+        Scanner scanner = new Scanner(System.in);
+
+        try {
+            System.out.print("Enter start date and time (e.g., 2024-12-01 09:00): ");
+            String startInput = scanner.nextLine();
+            LocalDateTime startDateTime = LocalDateTime.parse(startInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            System.out.print("Enter end time (e.g., 2024-12-01 17:00): ");
+            String endInput = scanner.nextLine();
+            LocalDateTime endDateTime = LocalDateTime.parse(endInput, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
+
+            System.out.print("Enter slot duration in minutes (e.g., 30 for 30-minute slots): ");
+            int slotDuration = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+
+            List<Appointment> newSlots = generateTimeSlots(startDateTime, endDateTime, slotDuration);
+            saveTimeSlots(newSlots);
+
+            System.out.println("Availability has been set successfully!");
+        } catch (Exception e) {
+            System.out.println("Error parsing date/time. Please try again.");
+        }
+    }
+
+    //Making helper function to generate time slots
+    private List<Appointment> generateTimeSlots(LocalDateTime start, LocalDateTime end, int intervalMinutes) {
+        List<Appointment> slots = new ArrayList<>();
+        LocalDateTime slotTime = start;
+        Random random=new Random();
+        while (slotTime.isBefore(end)) {
+            int AppointmentID=random.nextInt(9000)+1000;
+            String appointmentID = Integer.toString(AppointmentID);
+            Appointment slot = new Appointment(
+                    appointmentID,          // appointmentId
+                    Optional.empty(),       // patientId (no patient yet)
+                    this.id,                // doctor's ID
+                    Optional.empty(),       // status
+                    slotTime,
+                    Optional.empty()        // outcomeRecordId
+            );
+            slots.add(slot);
+            slotTime = slotTime.plusMinutes(intervalMinutes);
+        }
+        return slots;
+    }
+    //Making helper function to save time slots
+    private void saveTimeSlots(List<Appointment> slots) {
+        for (Appointment slot : slots) {
+            try {
+                slot.save();
+            } catch (IOException e) {
+                System.out.println("Error saving appointment slot: " + e.getMessage());
+            }
+        }
+    }
+
+
+
+    // Placeholder method for "View Upcoming Appointments"
+    private void viewUpcomingAppointments() {
+        System.out.println("Viewing upcoming appointments... (placeholder)");
+    }
+
+    // Placeholder method for "Record Appointment Outcomes"
+    private void recordAppointmentOutcomes() {
+        System.out.println("Recording appointment outcomes... (placeholder)");
+    }
+
 }
 
-// NOTE:
-// Nothing below has anything to do with the required Doctor functionality
-// Every method implemented below (other than the non-required specialty) is generic
-// and applies to all Staff. Thus, implemented in the Staff class, not Doctor.
+//         } catch (IOException e) {
+//             e.printStackTrace();
+//         }
 
-// public class Doctor extends Staff {
-//     private final String path="Doctor.csv";
-//     private String specialty;
-//     private List<Appointment> appointments;
-//     private String Username;
-
-//     public Doctor(int hospitalID, String password, String name, Date dateOfBirth, String gender, 
-//                   ContactInfo contactInfo, String specialty, String Username, String csvFilePath) {
-//         super(hospitalID, password, name, dateOfBirth, gender, contactInfo);
-//         this.specialty = specialty;
-//         this.Username = Username;
-//         this.appointments = loadAppointmentsFromCSV(path);  // Load initial appointments
-//     }
-//     public void saveToCSV() {
-//         try (FileWriter fileWriter = new FileWriter(path, true);
-//              PrintWriter printWriter = new PrintWriter(fileWriter)) {
-//             printWriter.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s%n",
-//                     hospitalID,
-//                     password,
-//                     getName(), // Use the getter here instead of direct field access
-//                     getDateOfBirth().toString(),
-//                     getGender(),
-//                     getContactInfo().getPhoneNumber(),
-//                     getContactInfo().getEmailAddress(),
-//                     this.specialty=specialty,
-//                     this.Username=Username);
-                    
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-//     }
-
-//     public String getSpeciality(String Username) {
-//         String line;
-//         String separator = ","; 
-    
-//         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//             // Skip header row
-//             br.readLine();
-    
-//             // Process each line in the CSV file
-//             while ((line = br.readLine()) != null) {
-//                 String[] values = line.split(separator);
-    
-//                 // Ensure values array has the correct length before accessing specific indices
-//                 if (values.length >= 9 && values[8].equals(Username)) { // Assuming 'Username' is at index 8
-//                     return values[7]; // Assuming 'specialty' is at index 7
-//                 }
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-    
-//         return null; // return null if username not found
-//     }
-
-//     public boolean setSpeciality(String Username, String newSpecialty) {
-//         List<String> lines = new ArrayList<>();
-//         String separator = ",";
-//         boolean isUpdated = false;
-    
-//         // Read the file and store each line in a list
-//         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//             String line = br.readLine(); // Read the header
-//             if (line != null) {
-//                 lines.add(line); // Add header to the list
-//             }
-    
-//             // Process each line in the CSV file
-//             while ((line = br.readLine()) != null) {
-//                 String[] values = line.split(separator);
-    
-//                 // Check if this line's Username matches the target Username
-//                 if (values.length >= 9 && values[8].equals(Username)) { // Username is at index 8
-//                     values[7] = newSpecialty; // Update specialty at index 7
-//                     isUpdated = true;
-//                 }
-    
-//                 // Reconstruct the line and add it to the list
-//                 lines.add(String.join(separator, values));
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//             return false; // Return false if there was an error reading the file
-//         }
-    
-//         // Write the updated lines back to the CSV file
-//         if (isUpdated) {
-//             try (PrintWriter writer = new PrintWriter(new FileWriter(path))) {
-//                 for (String outputLine : lines) {
-//                     writer.println(outputLine);
-//                 }
-//             } catch (IOException e) {
-//                 e.printStackTrace();
-//                 return false; // Return false if there was an error writing to the file
-//             }
-//         }
-    
-//         return isUpdated; // Return true if the specialty was successfully updated
-//     }
-    
-//     public String getHospitalID(String Username) {
-//         String line;
-//         String separator = ",";
-    
-//         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//             br.readLine(); // Skip header row
-    
-//             while ((line = br.readLine()) != null) {
-//                 String[] values = line.split(separator);
-    
-//                 if (values.length >= 9 && values[8].equals(Username)) { // Username at index 8
-//                     return values[0]; // hospitalID at index 0
-//                 }
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-    
-//         return null; // Return null if username not found
-//     }
-
-//     public String getPassword(String Username) {
-//         String line;
-//         String separator = ",";
-    
-//         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//             br.readLine(); // Skip header row
-    
-//             while ((line = br.readLine()) != null) {
-//                 String[] values = line.split(separator);
-    
-//                 if (values.length >= 9 && values[8].equals(Username)) { // Username at index 8
-//                     return values[1]; // password at index 1
-//                 }
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-    
-//         return null; // Return null if username not found
-//     }
-    
-//     public String getName(String Username) {
-//         String line;
-//         String separator = ",";
-    
-//         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//             br.readLine(); // Skip header row
-    
-//             while ((line = br.readLine()) != null) {
-//                 String[] values = line.split(separator);
-    
-//                 if (values.length >= 9 && values[8].equals(Username)) { // Username at index 8
-//                     return values[2]; // name at index 2
-//                 }
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-    
-//         return null; // Return null if username not found
-//     }
-
-//     public String getDateOfBirth(String Username) {
-//         String line;
-//         String separator = ",";
-    
-//         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//             br.readLine(); // Skip header row
-    
-//             while ((line = br.readLine()) != null) {
-//                 String[] values = line.split(separator);
-    
-//                 if (values.length >= 9 && values[8].equals(Username)) { // Username at index 8
-//                     return values[3]; // dateOfBirth at index 3
-//                 }
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-    
-//         return null; // Return null if username not found
-//     }
-
-//     public String getGender(String Username) {
-//         String line;
-//         String separator = ",";
-    
-//         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
-//             br.readLine(); // Skip header row
-    
-//             while ((line = br.readLine()) != null) {
-//                 String[] values = line.split(separator);
-    
-//                 if (values.length >= 9 && values[8].equals(Username)) { // Username at index 8
-//                     return values[4]; // gender at index 4
-//                 }
-//             }
-//         } catch (IOException e) {
-//             e.printStackTrace();
-//         }
-    
 //         return null; // Return null if username not found
 //     }
 
 //     public String getPhoneNumber(String Username) {
 //         String line;
 //         String separator = ",";
-    
+
 //         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 //             br.readLine(); // Skip header row
-    
+
 //             while ((line = br.readLine()) != null) {
 //                 String[] values = line.split(separator);
-    
+
 //                 if (values.length >= 9 && values[8].equals(Username)) { // Username at index 8
 //                     return values[5]; // phoneNumber at index 5
 //                 }
@@ -278,20 +380,20 @@ public class Doctor extends Staff {
 //         } catch (IOException e) {
 //             e.printStackTrace();
 //         }
-    
+
 //         return null; // Return null if username not found
 //     }
 
 //     public String getEmailAddress(String Username) {
 //         String line;
 //         String separator = ",";
-    
+
 //         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
 //             br.readLine(); // Skip header row
-    
+
 //             while ((line = br.readLine()) != null) {
 //                 String[] values = line.split(separator);
-    
+
 //                 if (values.length >= 9 && values[8].equals(Username)) { // Username at index 8
 //                     return values[6]; // emailAddress at index 6
 //                 }
@@ -299,7 +401,7 @@ public class Doctor extends Staff {
 //         } catch (IOException e) {
 //             e.printStackTrace();
 //         }
-    
+
 //         return null; // Return null if username not found
 //     }
 // }

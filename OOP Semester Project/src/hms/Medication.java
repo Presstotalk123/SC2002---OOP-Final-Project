@@ -26,4 +26,9 @@ public class Medication {
     public void updateStockLevel(int quantity) {
         this.stockLevel = quantity;
     }
+
+    public void setLowStockAlertLevel(int lowStockAlertLevel) {
+        this.lowStockAlertLevel = lowStockAlertLevel;
+    }
+    // Inventory.java
 }

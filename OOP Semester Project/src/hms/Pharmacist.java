@@ -48,11 +48,6 @@ public class Pharmacist extends Staff {
             case 2:
                 System.out.print("Enter Prescription ID to update: ");
                 String prescriptionId = scanner.nextLine();
-                // Why are you asking for medication name?
-                // Also Prescriptions should be updated individually, not all at once.
-                // System.out.print("Enter Medication Name to update: "); // Ask for medication
-                // name
-                // String medicationName = scanner.nextLine(); // Collect medication name
                 try {
                     while (true) {
                         System.out.print("Enter new status (e.g., Pending/Dispensed): ");

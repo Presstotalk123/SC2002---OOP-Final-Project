@@ -294,7 +294,7 @@ public class Administrator extends User {
         int stock = scanner.nextInt();
         System.out.println("Enter Low Stock Alert Level:");
         int lowStockLevel = scanner.nextInt();
-        inventory.addMedication(new InventoryItem(name, stock, lowStockLevel));
+        inventory.addMedication(new Medication(name, stock, lowStockLevel));
         saveInventoryData(); // Save changes to the file
         System.out.println("Inventory item added successfully.");
     }
@@ -302,7 +302,7 @@ public class Administrator extends User {
     private void updateInventoryItem(Scanner scanner) {
         System.out.println("Enter Medicine Name to update:");
         String name = scanner.nextLine();
-        InventoryItem item = inventory.findItem(name);
+        Medication item = inventory.getMedication(name);
         if (item != null) {
             System.out.println("Updating Inventory Item: " + item);
             System.out.println("Enter new Stock Level (or leave blank to keep current):");
@@ -311,9 +311,9 @@ public class Administrator extends User {
             String newLowStock = scanner.nextLine();
 
             if (!newStock.isEmpty())
-                item.setStock(Integer.parseInt(newStock));
+                item.updateStockLevel(Integer.parseInt(newStock));
             if (!newLowStock.isEmpty())
-                item.setLowStockLevel(Integer.parseInt(newLowStock));
+                item.setLowStockAlertLevel(Integer.parseInt(newLowStock));
 
             saveInventoryData(); // Save changes to the file
             System.out.println("Inventory item updated successfully.");
@@ -325,7 +325,7 @@ public class Administrator extends User {
     private void removeInventoryItem(Scanner scanner) {
         System.out.println("Enter Medicine Name to remove:");
         String name = scanner.nextLine();
-        if (inventory.removeItem(name)) {
+        if (inventory.removeMedication(name)) {
             saveInventoryData(); // Save changes to the file
             System.out.println("Inventory item removed successfully.");
         } else {
@@ -336,9 +336,9 @@ public class Administrator extends User {
     private void approveReplenishmentRequest(Scanner scanner) {
         System.out.println("Enter Medicine Name to approve replenishment request:");
         String name = scanner.nextLine();
-        InventoryItem item = inventory.findItem(name);
+        Medication item = inventory.getMedication(name);
         if (item != null) {
-            item.setStock(item.getStock() + 10); // Increase stock by 10 for example
+            item.updateStockLevel(item.getStockLevel() + 10); // Increase stock by 10 for example
             saveInventoryData(); // Save changes to the file
             System.out.println("Replenishment request approved for " + name);
         } else {
@@ -351,7 +351,7 @@ public class Administrator extends User {
         try {
             this.staffList.clear();
 
-            BufferedReader file = new BufferedReader(new FileReader("../data/users.csv"));
+            BufferedReader file = new BufferedReader(new FileReader("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/users.csv"));
             String nextLine = file.readLine();
             while ((nextLine = file.readLine()) != null) {
                 String[] user = nextLine.split(",");
@@ -377,11 +377,11 @@ public class Administrator extends User {
     }
 
     private void loadInventoryData() {
-        try (BufferedReader br = new BufferedReader(new FileReader("inventory_data.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("/Users/sam/programming/OOP---SC2002-Group-Project/OOP Semester Project/data/inventory.csv"))) {
             String line;
             while ((line = br.readLine()) != null) {
                 String[] data = line.split(",");
-                inventory.addItem(new InventoryItem(data[0], Integer.parseInt(data[1]), Integer.parseInt(data[2])));
+                inventory.addMedication(new Medication(data[0], Integer.parseInt(data[1]), Integer.parseInt(data[2])));
             }
         } catch (IOException e) {
             System.out.println("Error loading inventory data: " + e.getMessage());
@@ -410,10 +410,10 @@ public class Administrator extends User {
 
     private void saveInventoryData() {
         try (BufferedWriter bw = new BufferedWriter(new FileWriter("inventory_data.csv"))) {
-            for (InventoryItem item : inventory.getItems()) {
-            bw.write(item.getName() + "," + item.getStock() + "," +
-            item.getLowStockLevel());
-            bw.newLine();
+            for (Medication item : inventory.getMedications()) {
+                bw.write(item.getMedicationName() + "," + item.getStockLevel() + "," +
+                        item.getLowStockAlertLevel());
+                bw.newLine();
             }
         } catch (IOException e) {
             System.out.println("Error saving inventory data: " + e.getMessage());
