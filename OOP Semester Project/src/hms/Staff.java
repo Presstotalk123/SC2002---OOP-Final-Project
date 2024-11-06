@@ -15,7 +15,7 @@ public abstract class Staff extends User {
     private String phoneNumber;
     private String emailAddress;
 
-    public Staff(Scanner scanner, String role) {
+    public Staff(Scanner scanner, String role) throws IOException {
         super(scanner, role);
         try {
             super.save();
