@@ -1,9 +1,6 @@
 package hms;
 
-import java.io.BufferedReader;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -26,10 +23,14 @@ public abstract class User {
     System.out.print("Enter a name for this new user: ");
     String name = scanner.nextLine();
     while(true){
-    System.out.print("Enter a password for this new user: ");
-    String password = scanner.nextLine();
-    System.out.print("Re-enter the password: ");
-    String password2 = scanner.nextLine();
+      Console console = System.console();
+      if (console == null) {
+        throw new IOException("No console available");
+      }
+      char[] passwordArray = console.readPassword("Enter a password for this new user: ");
+      String password = new String(passwordArray);
+      char[] passwordArray2 = console.readPassword("Re-enter the password: ");
+      String password2 = new String(passwordArray2);
     if(password.equals(password2)){
       this.password = password;
       break;
