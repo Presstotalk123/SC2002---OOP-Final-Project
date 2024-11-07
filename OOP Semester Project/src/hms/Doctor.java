@@ -18,7 +18,7 @@ public class Doctor extends Staff {
     private String specialisation;
 
 
-    public Doctor(Scanner scanner) {
+    public Doctor(Scanner scanner) throws IOException {
         super(scanner, "doctor");
         try {
             super.save();
