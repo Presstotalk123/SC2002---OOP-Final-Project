@@ -24,18 +24,19 @@ public class Medication {
     }
 
     public void updateStockLevel(int quantity) {
-        if (quantity >= 0) {
-            this.stockLevel = quantity;
-        } else {
-            System.out.println("Stock level cannot be negative.");
-        }
+        this.stockLevel = quantity;
     }
 
     public void setLowStockAlertLevel(int lowStockAlertLevel) {
-        if (lowStockAlertLevel >= 0) {
-            this.lowStockAlertLevel = lowStockAlertLevel;
-        } else {
-            System.out.println("Low stock alert level cannot be negative.");
-        }
+        this.lowStockAlertLevel = lowStockAlertLevel;
+    }
+    // Inventory.java
+     @Override
+    public String toString() {
+        return "InventoryItem{" +
+                "Name='" + medicationName + '\'' +
+                ", Stock=" + stockLevel +
+                ", Low Stock Level=" + lowStockAlertLevel +
+                '}';
     }
 }
