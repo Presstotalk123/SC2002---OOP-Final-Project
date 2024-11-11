@@ -2,11 +2,14 @@ package hms;
 
 public class Medication {
     private String medicationName;
+    private int price;
     private int stockLevel;
     private int lowStockAlertLevel;
 
-    public Medication(String medicationName, int stockLevel, int lowStockAlertLevel) {
+
+    public Medication(String medicationName,int price, int stockLevel, int lowStockAlertLevel) {
         this.medicationName = medicationName;
+        this.price = price;
         this.stockLevel = stockLevel;
         this.lowStockAlertLevel = lowStockAlertLevel;
     }
@@ -17,6 +20,9 @@ public class Medication {
 
     public int getStockLevel() {
         return stockLevel;
+    }
+    public int getPrice() {
+        return price;
     }
 
     public int getLowStockAlertLevel() {
@@ -38,5 +44,14 @@ public class Medication {
                 ", Stock=" + stockLevel +
                 ", Low Stock Level=" + lowStockAlertLevel +
                 '}';
+    }
+
+    public int setPrice(int price) {
+        if (price >= 0) {
+            this.price = price;
+        } else {
+            System.out.println("Price cannot be negative.");
+        }
+        return price;
     }
 }
