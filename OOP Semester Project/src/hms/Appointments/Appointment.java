@@ -1,5 +1,7 @@
 package hms.Appointments;
-
+import hms.MedicalRecords.MedicalRecordDoctorView;
+import hms.MedicalRecords.MedicalRecordPatientView;
+import hms.MedicalRecords.MedicalRecords;
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -12,8 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import hms.Doctor;
-
 
 public class Appointment implements AppointmentPatientView, AppointmentDoctorView {
     private String id;
@@ -25,10 +25,10 @@ public class Appointment implements AppointmentPatientView, AppointmentDoctorVie
     private Optional<String> patientId;
     private Optional<String> outcomeRecordId; // points to a AppointmentOutcomeRecord id
     private Optional<AppointmentStatus> status; // e.g., confirmed, canceled, completed, this can be empty if doctor
-                                                // hasn't accepted or rejected
+    // hasn't accepted or rejected
 
     public Appointment(String id, Optional<String> patientId, String doctorId, Optional<AppointmentStatus> status,
-            LocalDateTime dateTime, Optional<String> outcomeRecordId) {
+                       LocalDateTime dateTime, Optional<String> outcomeRecordId) {
         this.id = id;
         this.patientId = patientId;
         this.doctorId = doctorId;
@@ -37,10 +37,12 @@ public class Appointment implements AppointmentPatientView, AppointmentDoctorVie
         this.status = status.or(() -> patientId.isPresent() ? Optional.of(AppointmentStatus.pending) : Optional.empty());
     }
 
-    public static List<Appointment> loadAllAppointments() throws IOException {
+    protected static List<Appointment> loadAllAppointments() throws IOException {
         List<Appointment> appointments = new ArrayList<Appointment>();
 
-        BufferedReader file = new BufferedReader(new FileReader("../data/appointments.csv"));
+        BufferedReader file = new BufferedReader(new FileReader("MedicalRecordDoctorView.java\n" +
+                "MedicalRecordPatientView.java\n" +
+                "MedicalRecords.java"));
 
         String nextLine = file.readLine();
         while ((nextLine = file.readLine()) != null) {
@@ -88,8 +90,8 @@ public class Appointment implements AppointmentPatientView, AppointmentDoctorVie
 
     public void save() throws IOException {
 
-        List<String> lines = Files.readAllLines(Paths.get("../data/appointments.csv"));
-        FileOutputStream output = new FileOutputStream("../data/appointments.csv");
+        List<String> lines = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv"));
+        FileOutputStream output = new FileOutputStream("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv");
 
         boolean isEntryFound = false;
         for (int i = 0; i < lines.size(); i++) {
@@ -137,32 +139,6 @@ public class Appointment implements AppointmentPatientView, AppointmentDoctorVie
         return this.dateTime.format(patternDate) + " at " + this.dateTime.format(patternTime);
     }
 
-    public String getDateString() {
-        DateTimeFormatter patternDate = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        return this.dateTime.format(patternDate);
-    }
-
-    public LocalDateTime getDate() {
-        return this.dateTime;
-    }
-
-    public String getTimeString() {
-        DateTimeFormatter patternTime = DateTimeFormatter.ofPattern("HH:mm:ss");
-        return this.dateTime.format(patternTime);
-    }
-
-    public Doctor getDoctor() {
-        try {
-            return new Doctor(this.doctorId);
-        } catch (IOException error) {
-            return null;
-        }
-    }
-
-    public boolean isBooked() {
-        return this.patientId.isPresent();
-    }
-
     public boolean isBookable() {
         if (this.status.isEmpty())
             return this.patientId.isEmpty();
@@ -170,13 +146,15 @@ public class Appointment implements AppointmentPatientView, AppointmentDoctorVie
     }
 
     // TODO: Doctor to Implement accept()
-    public void accept() {
-
+    public void accept() throws IOException {
+        this.setStatus(Optional.of(AppointmentStatus.confirmed));
+        this.save();
     }
 
     // TODO: Doctor to Implement decline()
-    public void decline() {
-
+    public void decline() throws IOException {
+        this.setStatus(Optional.of(AppointmentStatus.cancelled));
+        this.save();
     }
 
     // TODO: Doctor to Implement complete()
@@ -197,6 +175,6 @@ public class Appointment implements AppointmentPatientView, AppointmentDoctorVie
     }
 
     public void setStatus(Optional<AppointmentStatus> status) {
-        this.status=status;
+        this.status = status;
     }
 }

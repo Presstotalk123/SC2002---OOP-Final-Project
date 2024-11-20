@@ -1,10 +1,12 @@
-package hms;
+package hms.Billing;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.security.MessageDigest;
 import java.util.Date;
 
 public class Block implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L; // Added serialVersionUID
     
     public String hash;

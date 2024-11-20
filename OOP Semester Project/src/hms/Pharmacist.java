@@ -1,6 +1,10 @@
 package hms;
 
+import hms.appointment_outcome_record.AppointmentOutcomeRecord;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -26,9 +30,7 @@ public class Pharmacist extends Staff {
                 2. Update Prescription Status
                 3. View Medication Inventory
                 4. Submit Replenishment Request
-                5. View Pending Prescription
-                6. Dispense Medication
-                7. Log Out
+                5. Log Out
                 Enter your choice:""");
 
         int choice = scanner.nextInt();
@@ -36,69 +38,57 @@ public class Pharmacist extends Staff {
 
         switch (choice) {
             case 1:
-                List<AppointmentOutcomeRecord> records = AppointmentOutcomeRecord.getAllRecords();
-                // Print the records
-                if (records.isEmpty()) {
-                    System.out.println("No appointment outcome records found.");
-                } else {
-                    System.out.println("Appointment Outcome Records:");
-                    for (AppointmentOutcomeRecord record : records) {
-                        System.out.println(record); // Assumes AppointmentOutcomeRecord has a toString() method
-                    }
-                }
+                AppointmentOutcomeRecord.getAllRecords();
                 break;
             case 2:
                 System.out.print("Enter Prescription ID to update: ");
                 String prescriptionId = scanner.nextLine();
-                // Why are you asking for medication name?
-                // Also Prescriptions should be updated individually, not all at once.
-                // System.out.print("Enter Medication Name to update: "); // Ask for medication
-                // name
-                // String medicationName = scanner.nextLine(); // Collect medication name
+                
                 try {
                     while (true) {
                         System.out.print("Enter new status (e.g., Pending/Dispensed): ");
                         String status = scanner.nextLine();
-                        if (status.toLowerCase().equals("pending")) {
+                        
+                        if (status.equalsIgnoreCase("pending")) {
                             updatePrescriptionStatus(prescriptionId, PrescriptionStatus.Pending);
-                        } else if (status.toLowerCase().equals("dispensed")) {
+                            break; // Exit after successful update
+                        } else if (status.equalsIgnoreCase("dispensed")) {
                             updatePrescriptionStatus(prescriptionId, PrescriptionStatus.Dispensed);
+                            break; // Exit after successful update
                         } else {
-                            System.out.println("Invalid choice! Please choosse between Pending or Dispensed");
+                            System.out.println("Invalid choice! Please choose between Pending or Dispensed.");
                         }
                     }
-
                 } catch (IOException error) {
                     System.out.println("Failed to update Prescription Status: " + error.getMessage());
                 }
                 break;
+            
             case 3:
                 displayMedicationInventory();
                 break;
             case 4:
                 System.out.print("Enter Medication Name: ");
                 String medicationName = scanner.nextLine();
-                System.out.print("Enter Quantity: ");
-                int quantity = scanner.nextInt();
+                int quantity = 0;
+
+                while (true) {
+                    System.out.print("Enter Quantity: ");
+                    try {
+                        quantity = scanner.nextInt();
+                        scanner.nextLine(); // Consume newline
+                        break; // Exit loop if input is valid
+                    } catch (InputMismatchException e) {
+                        System.out.println("Invalid input! Please enter a numeric value for quantity.");
+                        scanner.nextLine(); // Clear the invalid input
+                    }
+                }
+
                 submitReplenishmentRequest(medicationName, quantity);
                 break;
+
             case 5:
-                try {
-                    viewPendingPrescription();
-                } catch (IOException error) {
-                    System.out.println("Failed to view pending prescriptions: " + error.getMessage());
-                }
-                break;
-            case 6:
-                System.out.print("Enter Prescription ID to dispense: ");
-                String prescriptionIdToDispense = scanner.nextLine();
-                try {
-                    dispenseMedication(prescriptionIdToDispense);
-                } catch (IOException error) {
-                    System.out.println("Failed to dispense medication: " + error.getMessage());
-                }
-                break;
-            case 7:
+                System.out.println("Signed out successfully.");
                 return false;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -109,83 +99,61 @@ public class Pharmacist extends Staff {
     }
 
 
-
-
     public void updatePrescriptionStatus(String prescriptionId, PrescriptionStatus status) throws IOException {
-    List<Prescription> records = Prescription.getAll();
-    Inventory inventory = new Inventory();
-    inventory.loadFromCSV(); // Load the current inventory
-    boolean found = false;
+        List<Prescription> records = Prescription.getAll();
+        Inventory inventory = new Inventory();
+        inventory.loadFromCSV(); // Load the current inventory
+        boolean found = false;
 
-    for (Prescription record : records) {
-        if (record.getID().equals(prescriptionId)) {
-            record.updateStatus(status);
-            record.save();
-            found = true;
-            
-            // Update inventory if the status is set to dispensed
-            if (status == PrescriptionStatus.Dispensed) {
-                Medication med = inventory.getMedication(record.getMedicationName());
-                if (med != null) {
-                    int newStockLevel = med.getStockLevel() - 1; // Assume 1 unit is dispensed per prescription
-                    inventory.updateStockLevel(record.getMedicationName(), newStockLevel);
-                    inventory.saveToCSV(".../data/inventory.csv");
+        for (Prescription record : records) {
+            if (record.getID().equals(prescriptionId)) {
+                record.updateStatus(status);
+                record.save();
+                found = true;
+
+                // Update inventory if the status is set to dispensed
+                if (status == PrescriptionStatus.Dispensed) {
+                    Medication med = inventory.getMedication(record.getMedicationName());
+                    if (med != null) {
+                        int quantityDispensed = record.getQuantity(); // Get the quantity from the prescription
+                        int newStockLevel = med.getStockLevel() - quantityDispensed; // Subtract the dispensed quantity
+                        inventory.updateStockLevel(record.getMedicationName(), newStockLevel);
+                        inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
+                    }
+                }
+                break; // Exit the loop as we found the prescription
+            }
+        }
+
+        if (found) {
+            System.out.println("Prescription status updated successfully.");
+        } else {
+            System.out.println("Prescription not found for the given prescription ID.");
+        }
+        
+}
+
+
+
+
+
+
+    private boolean checkAppointmentStatus(String appointmentId) throws IOException {
+        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values.length > 0 && values[0].equals(appointmentId)) {
+                    String status = values[4].trim(); // Assuming index 4 is status
+                    return "completed".equalsIgnoreCase(status);
                 }
             }
-            break; // Exit the loop as we found the prescription
         }
+        return false; // Return false if appointment not found or not completed
     }
 
-    if (found) {
-        System.out.println("Prescription status updated successfully.");
-    } else {
-        System.out.println("Prescription not found for the given prescription ID.");
-    }
-}
-public void viewPendingPrescription() throws IOException {
-    List<Prescription> records = Prescription.getAll();
-    boolean found = false;
-
-    for (Prescription record : records) {
-        if (record.getStatus() == PrescriptionStatus.Pending) {
-            System.out.println(record);
-            found = true;
-        }
-    }
-
-    if (!found) {
-        System.out.println("No pending prescriptions found.");
-    }
-}
-public void dispenseMedication(String prescriptionId) throws IOException {
-    List<Prescription> records = Prescription.getAll();
-    Inventory inventory = new Inventory();
-    inventory.loadFromCSV(); // Load the current inventory
-    boolean found = false;
-
-    for (Prescription record : records) {
-        if (record.getID().equals(prescriptionId)) {
-            record.updateStatus(PrescriptionStatus.Dispensed);
-            record.save();
-            found = true;
-
-            // Update inventory
-            Medication med = inventory.getMedication(record.getMedicationName());
-            if (med != null) {
-                int newStockLevel = med.getStockLevel() - record.getQuantity(); // Deduct the quantity specified in the prescription
-                inventory.updateStockLevel(record.getMedicationName(), newStockLevel);
-                inventory.saveToCSV(".../data/inventory.csv");
-            }
-            break; // Exit the loop as we found the prescription
-        }
-    }
-
-    if (found) {
-        System.out.println("Prescription dispensed successfully.");
-    } else {
-        System.out.println("Prescription not found for the given prescription ID.");
-    }
-}
 
     public void displayMedicationInventory() {
         Inventory inventory = new Inventory();
@@ -209,12 +177,20 @@ public void dispenseMedication(String prescriptionId) throws IOException {
         ReplenishmentRequest request = new ReplenishmentRequest(
                 generateRequestID(), medicationName, quantity, "Pending");
         // Submit the request (this will also create the file if it doesn't exist)
-        request.saveToCSV("../data/replenishment_requests.csv");
+        request.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\replenishment_requests.csv");
     }
 
     private String generateRequestID() {
         // Generates a unique request ID
         return "REQ" + System.currentTimeMillis();
     }
+
+   
+    
+
+    @Override
+        public String toString() {
+        return this.id + " - Pharmacist - " + this.name;
+}
 
 }

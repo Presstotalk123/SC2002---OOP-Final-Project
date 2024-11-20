@@ -1,11 +1,8 @@
 package hms.MedicalRecords;
 
-import hms.AppointmentOutcomeRecord;
 import hms.Doctor;
 import hms.Gender;
 import hms.Patient;
-import hms.Prescription;
-
 import java.io.BufferedReader;
 import java.io.FileOutputStream;
 import java.io.FileReader;
@@ -13,7 +10,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 
 public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDoctorView {
@@ -24,14 +23,15 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
     private Gender gender;
     private String phoneNumber;
     private String emailAddress;
-    private List<String> diagnosis;
-    private List<Prescription> prescriptions;
-    private List<String> treatments;
+    private String diagnosis;
+    private String treatments;
     private String bloodType; // final as this field should not be updated.
+    private List<String> allergies;
 
     public MedicalRecords(Scanner scanner, String id, String name) {
         this.id = id;
         this.name = name;
+        this.allergies = new ArrayList<>();
         while (true) {
             System.out.print("Enter the Date of Birth for this user in the format (DD-MM-YYYY): ");
             String dateOfBirth = scanner.nextLine();
@@ -79,7 +79,7 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
             }
         }
 
-        System.out.print("Enter the blood type for this user (Note: This cannot be changed): ");
+        System.out.print("Enter the blood type for this user: ");
         String bloodType = scanner.nextLine();
 
         this.bloodType = bloodType;
@@ -97,19 +97,12 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         this.phoneNumber = record[4];
         this.emailAddress = record[5];
         this.bloodType = record[6];
+        this.diagnosis = record[7];
+        this.treatments = record[8];
+        this.allergies = record.length > 9 && !record[9].equals("None") 
+                 ? new ArrayList<>(Arrays.asList(record[9].split(";"))) 
+                 : new ArrayList<>();
 
-        this.diagnosis = new ArrayList<>();
-        this.treatments = new ArrayList<>();
-        this.prescriptions = new ArrayList<>();
-
-        for (AppointmentOutcomeRecord apptRecord : AppointmentOutcomeRecord.getAllRecords()) {
-
-            if (apptRecord.getPatientID() == id) {
-                this.diagnosis.add(apptRecord.getDiagnosis());
-                this.treatments.add(apptRecord.getTreatmentPlan());
-                this.prescriptions.addAll(apptRecord.getPrescribedMedications());
-            }
-        }
 
         // TODO: Add retrieval of diagnosis, prescriptions and treatments
 
@@ -136,20 +129,19 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
     }
 
     private static String[] loadMedicalRecordFromFile(String id) throws IOException {
-        BufferedReader file = new BufferedReader(new FileReader("../data/medical_record.csv"));
+        BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"));
 
-        String nextLine = file.readLine();
+        String nextLine;
         while ((nextLine = file.readLine()) != null) {
             String[] patient = nextLine.split(",");
 
-            if (patient.length < 7) {
-                continue;
+            if (patient.length < 10) {
+                String[] updatedPatient = Arrays.copyOf(patient, 10);
+                updatedPatient[9] = "None"; // Default allergy
+                return updatedPatient;
             }
 
-            String currentId = patient[0];
-
-            if (currentId.equals(id)) {
-                file.close();
+            if (patient[0].equals(id)) {
                 return patient;
             }
         }
@@ -174,104 +166,43 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         }
     }
 
+    // From MedicalRecordDoctorAccess
+
+    // From MedicalRecordDoctorAccess
+
+    // From MedicalRecordDoctorAccess
+
+
     public String toString() {
-
-        StringBuilder builder = new StringBuilder();
-
-        String tableFormatter = "| %-4s | %-16s | %-10s | %-6s | %-9s | %-24s | %-10s | %n";
-
-        builder.append(
-                "+------+------------------+------------+--------+-----------+--------------------------+------------+\n");
-        builder.append(
-                "|                                       Your Medical Record                                         |\n");
-        builder.append(
-                "+------+------------------+------------+--------+-----------+--------------------------+------------+\n");
-        builder.append(
-                "| ID   | Name             | Birth Date | Gender | Phone No. | Email Address            | Blood Type |\n");
-        builder.append(
-                "+------+------------------+------------+--------+-----------+--------------------------+------------+\n");
-        builder.append(String.format(tableFormatter, this.id, this.name, this.dateOfBirth,
-                this.gender.toString().toLowerCase(), this.phoneNumber, this.emailAddress, this.bloodType));
-        builder.append(
-                "+------+------------------+------------+--------+-----------+--------------------------+------------+\n\n\n");
-
-        builder.append(
-                "+----------------------------------------+\n");
-        builder.append(
-                "|                Diagnoses               |\n");
-        builder.append(
-                "+----------------------------------------+\n");
-
-        tableFormatter = "| %-38s | %n";
-
-        for (String diagnosis : this.diagnosis) {
-            builder.append(String.format(tableFormatter, diagnosis));
-        }
-
-        if (this.diagnosis.size() == 0) {
-            builder.append(String.format(tableFormatter, "No diagnoses found!"));
-        }
-
-
-        builder.append(
-                "+----------------------------------------+\n\n\n");
-
-        builder.append(
-                "+----------------------------------------+\n");
-        builder.append(
-                "|             Treatment Plans            |\n");
-        builder.append(
-                "+----------------------------------------+\n");
-
-        tableFormatter = "| %-38s | %n";
-
-        for (String treatment : this.treatments) {
-            builder.append(String.format(tableFormatter, treatment));
-        }
-
-        if (this.treatments.size() == 0) {
-            builder.append(String.format(tableFormatter, "No treatments found!"));
-        }
-
-        builder.append(
-                "+----------------------------------------+\n\n\n");
-
-        builder.append(
-                "+----------------------------------------+\n");
-        builder.append(
-                "|              Prescriptions             |\n");
-        builder.append(
-                "+----------------------------------------+\n");
-
-        tableFormatter = "| %-38s | %n";
-
-        for (Prescription prescription : this.prescriptions) {
-            builder.append(String.format(tableFormatter, prescription.getMedicationName()));
-        }
-
-        if (this.prescriptions.size() == 0) {
-            builder.append(String.format(tableFormatter, "No prescriptions found!"));
-        }
-
-        builder.append(
-                "+----------------------------------------+\n\n\n");
-
-        return builder.toString();
+        return new StringBuilder()
+                .append("Patient ID: " + this.id + "\n")
+                .append("Name: " + this.name + "\n")
+                .append("Date of Birth: " + this.dateOfBirth + "\n")
+                .append("Gender: " + this.gender + "\n")
+                .append("Phone Number: " + this.phoneNumber + "\n")
+                .append("Email Address: " + this.emailAddress + "\n")
+                .append("Blood Type: " + this.bloodType + "\n")
+                .append("Diagnosis: " + this.diagnosis + "\n")
+                .append("Treatments: " + this.treatments + "\n")
+                .append("Allergies: " + (this.allergies.isEmpty() ? "None" : String.join(", ", this.allergies)) + "\n")
+                .toString();
     }
 
     public void saveToFile() throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get("../data/medical_record.csv"));
-        FileOutputStream output = new FileOutputStream("../data/medical_record.csv");
+        List<String> lines = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"));
+        FileOutputStream output = new FileOutputStream("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv");
 
         boolean isEntryFound = false;
 
         for (int i = 0; i < lines.size(); i++) {
             String[] patient = lines.get(i).split(",");
 
-            if (patient.length == 7 && patient[0].equals(this.id)) {
+            if (patient.length >= 9 && patient[0].equals(this.id)) {
+                //String diagnosisString = (this.diagnosis == null || this.diagnosis.isEmpty() || Objects.equals(this.diagnosis, "Not Available")) ? "Not Available" : this.diagnosis;
+                //String treatmentsString = (this.treatments == null || this.treatments.isEmpty() || Objects.equals(this.treatments, "Not Available")) ? "Not Available" : this.treatments;
                 String newEntry = this.id + "," + this.name + "," + this.dateOfBirth + "," +
                         this.gender.toString().toLowerCase() + "," + this.phoneNumber + "," +
-                        this.emailAddress + "," + this.bloodType + "\n";
+                        this.emailAddress + "," + this.bloodType + "," + this.diagnosis + "," + this.treatments + "," + String.join(";", this.allergies) + "\n";
                 output.write(newEntry.getBytes());
                 isEntryFound = true;
             } else {
@@ -284,13 +215,48 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         if (!isEntryFound) {
             String newEntry = this.id + "," + this.name + "," + this.dateOfBirth + "," +
                     this.gender.toString().toLowerCase() + "," + this.phoneNumber + "," +
-                    this.emailAddress + "," + this.bloodType + "\n";
+                    this.emailAddress + "," + this.bloodType + "," + "Not Available" + "," +
+                    "Not Available" + "," + "None" + "\n";
             output.write(newEntry.getBytes());
         }
+        
 
         output.close();
     }
 
-}
+    public void addDiagnosis(String diagnosis) throws IOException {
+        if (diagnosis == null || diagnosis.trim().isEmpty()) {
+            diagnosis = "Not Available";
+        }
+        this.diagnosis = (Objects.equals(this.diagnosis, "Not Available") || this.diagnosis.isEmpty()) ? diagnosis.trim() : this.diagnosis + ";" + diagnosis.trim();
+        this.saveToFile();
+        System.out.println("Diagnosis added successfully!");
+    }
 
-// I use interfaces to limit what different users can do
+    public void addTreatments(String treatments) throws IOException {
+        if (treatments == null || treatments.trim().isEmpty()) {
+            treatments = "Not Available";
+        }
+        this.treatments = (Objects.equals(this.treatments, "Not Available") || this.treatments.isEmpty()) ? treatments.trim() : this.treatments + ";" + treatments.trim();
+        this.saveToFile();
+        System.out.println("Treatments added successfully!");
+    }
+
+    @Override
+    public void addAllergy(String allergy) {
+        if (!allergies.contains(allergy)) {
+            allergies.add(allergy);
+            System.out.println("Allergy added: " + allergy);
+            try {
+                saveToFile(); // Persist the update to file
+            } catch (IOException e) {
+                System.out.println("Error saving updated allergies: " + e.getMessage());
+            }
+        } else {
+            System.out.println("Allergy already exists.");
+        }
+    }
+    
+
+
+}

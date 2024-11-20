@@ -3,10 +3,7 @@ package hms;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class User {
@@ -22,37 +19,73 @@ public abstract class User {
   public User(Scanner scanner, String role) throws IOException {
     System.out.print("Enter a name for this new user: ");
     String name = scanner.nextLine();
-    while (true) {
-      System.out.print("Enter a password for this new user: ");
-      String password = scanner.nextLine();
-      System.out.print("Re-enter the password: ");
-      String password2 = scanner.nextLine();
-      if (password.equals(password2)) {
-        this.password = password;
-        break;
-      } else {
-        System.out.println("Passwords do not match. Please try again.");
-      }
+    while(true){
+    System.out.print("Enter a password for this new user: ");
+    String password = scanner.nextLine();
+    System.out.print("Re-enter the password: ");
+    String password2 = scanner.nextLine();
+    if(password.equals(password2)){
+      this.password = password;
+      break;
+    } else {
+      System.out.println("Passwords do not match. Please try again.");
+    }
     }
 
     Random rand = new Random();
-    List<String> existingIds = User.loadAllUsers()
-        .stream()
-        .map(user -> user.id)
-        .collect(Collectors.toList());
-
-    while (true) {
-      int id = rand.nextInt(9000) + 1000;
-      if (!existingIds.contains(Integer.toString(id))) {
-        System.out.println("Your ID is: " + id);
-        this.id = Integer.toString(id);
-        break;
+    List<String> existingIds = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"))
+            .stream()
+            .map(line -> line.split(",")[0])
+            .collect(Collectors.toList());
+    if(Objects.equals(role, "patient")){
+      while (true) {
+        int ID = rand.nextInt(9000) + 1000;
+        String id="P"+ID;
+        if (!existingIds.contains(id)) {
+          System.out.println("Your ID is: " + id);
+          this.id = id;
+          break;
+        }
+      }
+    }
+    else if(Objects.equals(role, "doctor")){
+      while (true) {
+        int ID = rand.nextInt(900) + 100;
+        String id="D"+ID;
+        if (!existingIds.contains(id)) {
+          System.out.println("Your ID is: " + id);
+          this.id = id;
+          break;
+        }
+      }
+    }
+    else if(Objects.equals(role, "administrator")){
+      while (true) {
+        int ID = rand.nextInt(900) + 100;
+        String id="A"+ID;
+        if (!existingIds.contains(id)) {
+          System.out.println("Your ID is: " + id);
+          this.id = id;
+          break;
+        }
+      }
+    }
+    else if(Objects.equals(role, "pharmacist")){
+      while (true) {
+        int ID = rand.nextInt(900) + 100;
+        String id="P"+ID;
+        if (!existingIds.contains(id)) {
+          System.out.println("Your ID is: " + id);
+          this.id = id;
+          break;
+        }
       }
     }
     this.name = name;
     this.role = role;
 
   }
+
 
   public User(String id, String name, String password, String role) {
     this.id = id;
@@ -61,22 +94,13 @@ public abstract class User {
     this.role = role;
   }
 
-  public User(String id) throws IOException {
-    User existingUser = User.loadAllUsers().stream().filter(user -> user.id.equals(id)).findFirst().get();
-    this.id = existingUser.id;
-    this.name = existingUser.name;
-    this.password = existingUser.password;
-    this.role = existingUser.role;
-  }
-
   public boolean login(String password) {
     return this.password.equals(password);
   }
 
-  public static List<User> loadAllUsers() throws IOException {
+  public static List<User> loadFromFile(String path) throws IOException {
     List<User> userArray = new ArrayList<User>();
-
-    BufferedReader file = new BufferedReader(new FileReader("../data/users.csv"));
+    BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"));
     String nextLine = file.readLine();
     while ((nextLine = file.readLine()) != null) {
       String[] user = nextLine.split(",");
@@ -97,30 +121,71 @@ public abstract class User {
   }
 
   public void save() throws IOException {
-    List<String> lines = Files.readAllLines(Paths.get("../data/users.csv"));
-    FileOutputStream output = new FileOutputStream("../data/users.csv");
+    String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
 
-    boolean isEntryFound = false;
-    for (int i = 0; i < lines.size(); i++) {
-      String[] appt = lines.get(i).split(",");
+    // Read all lines from the file
+    List<String> lines = Files.readAllLines(Paths.get(filePath));
+    boolean isUpdated = false;
 
-      if (appt.length == 6 && appt[0].equals(this.id)) {
-        String newEntry = this.id + "," + (this.name) + "," + this.password + "," + this.role + "\n";
-        output.write(newEntry.getBytes());
-        isEntryFound = true;
-      } else {
-        String line = lines.get(i) + "\n";
-        output.write(line.getBytes());
+    try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+        for (String line : lines) {
+            String[] parts = line.split(",");
+            
+            // If the ID matches, update the user details
+            if (parts[0].equals(this.id)) {
+                writer.write(this.id + "," + this.name + "," + this.password + "," + this.role + "\n");
+                isUpdated = true;
+            } else {
+                writer.write(line + "\n"); // Write the existing line back if it doesn't match
+            }
+        }
+
+        // If the user is not found in the file, add a new entry
+        if (!isUpdated) {
+            writer.write(this.id + "," + this.name + "," + this.password + "," + this.role + "\n");
+        }
+    } catch (IOException e) {
+        System.out.println("Error saving user data: " + e.getMessage());
+    }
+}
+
+
+public static void forgotPassword(String hospitalId, String name, Scanner scanner) throws IOException {
+  List<User> users = loadFromFile("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv");
+  User userToReset = null;
+
+  for (User user : users) {
+      if (user.id.equals(hospitalId) && user.name.equals(name)) {
+          userToReset = user;
+          break;
       }
-    }
-
-    if (!isEntryFound) {
-      String newEntry = this.id + "," + (this.name) + "," + this.password + "," + this.role + "\n";
-      output.write(newEntry.getBytes());
-    }
-
-    output.close();
   }
+
+  if (userToReset == null) {
+      System.out.println("Incorrect Hospital ID or Name. Please contact the administrator for password reset!");
+      return;
+  }
+
+  while (true) {
+      System.out.print("Enter a new password for this user: ");
+      String newPassword = scanner.nextLine();
+      System.out.print("Re-enter the new password: ");
+      String newPassword2 = scanner.nextLine();
+      if (newPassword.equals(newPassword2)) {
+          userToReset.password = newPassword;
+          userToReset.save(); // This will now correctly update the existing entry
+          System.out.println("Password reset successfully.");
+          break;
+      } else {
+          System.out.println("Passwords do not match. Please try again.");
+      }
+  }
+}
+
+protected String getPassword() {
+  return this.password;
+}
+
 
   // Return true to logout
   public abstract boolean eventLoop(Scanner scanner) throws IOException;

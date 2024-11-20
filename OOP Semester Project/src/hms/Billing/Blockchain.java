@@ -1,12 +1,15 @@
-package hms;
+package hms.Billing;
 
+
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Blockchain implements Serializable {
+    @Serial
     private static final long serialVersionUID = 1L; // Added serialVersionUID
-    
+
     public List<Block> chain;
 
     public Blockchain() {
@@ -40,5 +43,4 @@ public class Blockchain implements Serializable {
         }
         return true;
     }
-
 }

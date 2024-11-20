@@ -1,0 +1,4 @@
+userId,name,dateOfBirth,gender,phoneNumber,email,bloodType,past diagnosis,past treatment,allergy
+P2967,spiderman,25-12-2005,male,23456789,spooderman@gmail.com,A,Not Available,Not Available,None
+P4806,potter,20-03-2009,male,22112211,hogwarts2@gmail.com,A,Cancer,Chemo,peanuts
+P9567,Logan,01-10-2005,female,99559944,loganpaul2@gmail.com,A,Fever;Cough,Medicine provided;strepsils,milk

@@ -1,14 +1,25 @@
 package hms;
 
+// import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+// import java.util.Date;
 
 class Main {
 
   public static void main(String[] args) throws IOException {
-    System.out.println("Welcome to Hospital Management System!");
+    System.out.println("██╗   ██╗ ███╗   ███╗ ███████╗");
+    System.out.println("██║   ██║ ████╗ ████║ ██╔════╝");
+    System.out.println("████████║ ██╔████╔██║ ███████╗  ");
+    System.out.println("██╔═══██║ ██║╚██╔╝██║      ██║   ");
+    System.out.println("██║   ██║ ██║ ╚═╝ ██║ ███████║ ");
+    System.out.println("╚═╝   ╚═╝ ╚═╝     ╚═╝ ╚══════╝");
+    System.out.println();
+    System.out.println("══════════════════════════════════════════════════════════════════════════════════════════════════════");
+    System.out.println();
+    System.out.println("Welcome to Hospital Management System(HMS)!");
 
     Scanner scanner = new Scanner(System.in);
 
@@ -22,8 +33,7 @@ class Main {
     // Load data on program startup
     List<User> users;
     try {
-      users = User.loadAllUsers();
-      System.out.println(users);
+      users = User.loadFromFile("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv");
     } catch (IOException error) {
       System.out.println("Error occurred when loading data: ");
       error.printStackTrace();
@@ -32,9 +42,10 @@ class Main {
 
     System.out.print("""
               What would you like to do?
-              1. Login
+              1. Log In
               2. Sign Up
-              3. Exit
+              3. Forgot Password
+              4. Exit
             """);
 
     int input = scanner.nextInt();
@@ -113,8 +124,15 @@ class Main {
 
         }
         break;
-
       case 3:
+        System.out.println("Forgot Password");
+        System.out.print("Enter your Hospital ID: ");
+        String hospitalIdToReset = scanner.nextLine();
+        System.out.print("Enter your Name: ");
+        String nameToReset = scanner.nextLine();
+        User.forgotPassword(hospitalIdToReset, nameToReset, scanner);
+        break;
+      case 4:
         return false;
 
       default:

@@ -1,1 +1,3 @@
-BillingId,PatientId,Description,Amount,Paid
+id,patientId,description,amount,paid
+"BILL1732059215760","P2967","Billing for prescription IDs: 4609",100.00,true
+"BILL1732068880541","P2967","Billing for prescription IDs: 8251, 5529",50.00,true

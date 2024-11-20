@@ -1,22 +1,18 @@
 package hms.Appointments;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-
-import hms.Doctor;
 
 public interface AppointmentPatientView {
 
   String getId();
 
-  String getDateString();
-
-  String getTimeString();
-
-  Doctor getDoctor();
+  String getDateTime();
 
   Optional<String> getPatientId();
 
@@ -28,19 +24,42 @@ public interface AppointmentPatientView {
 
   void save() throws IOException;
 
-  boolean isBooked();
-
   boolean isBookable();
 
-  // Casts all appointsments into a PatientView
-  static List<AppointmentPatientView> loadAllAppointments() throws IOException {
-    List<AppointmentPatientView> appts = new ArrayList<AppointmentPatientView>();
-    Iterator<Appointment> it = Appointment.loadAllAppointments().iterator();
-    while (it.hasNext()) {
-      AppointmentPatientView appt = it.next();
-      appts.add(appt);
+  static List<Appointment> loadAllAppointments() throws IOException {
+    List<Appointment> appointments = new ArrayList<>();
+
+    try (BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv"))) {
+      String nextLine = file.readLine();
+      while ((nextLine = file.readLine()) != null) {
+        String[] appt = nextLine.split(",");
+        if (appt.length < 6) {
+          continue;
+        }
+
+        String status = appt[4];
+        Optional<AppointmentStatus> apptStatus;
+        if (status.toLowerCase().equals("confirmed"))
+          apptStatus = Optional.of(AppointmentStatus.confirmed);
+        else if (status.toLowerCase().equals("cancelled"))
+          apptStatus = Optional.of(AppointmentStatus.cancelled);
+        else if (status.toLowerCase().equals("completed"))
+          apptStatus = Optional.of(AppointmentStatus.completed);
+        else
+          apptStatus = Optional.empty();
+
+        appointments.add(
+                new Appointment(
+                        appt[0],
+                        Optional.ofNullable(appt[1].equals("") ? null : appt[1]),
+                        appt[2],
+                        apptStatus,
+                        LocalDateTime.parse(appt[5]),
+                        Optional.ofNullable(appt[3].equals("") ? null : appt[3])));
+      }
     }
-    return appts;
+
+    return appointments;
   }
   // A reschedule is just a cancel then schedule.
 }

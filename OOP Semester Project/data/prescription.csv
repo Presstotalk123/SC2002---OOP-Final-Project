@@ -1,1 +1,6 @@
-Prescription ID,Medication Name,Status
+Prescription ID,Medication Name,Quantity,Status
+4609,dolo,5,dispensed
+8251,dolo,5,pending
+5529,allegra,2,pending
+2022,Dolo,5,dispensed
+3459,Panadol,2,dispensed

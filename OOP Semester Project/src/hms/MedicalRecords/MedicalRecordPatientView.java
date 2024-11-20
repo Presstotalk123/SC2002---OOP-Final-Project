@@ -11,4 +11,9 @@ public interface MedicalRecordPatientView {
 
   void saveToFile() throws IOException;
 
+  void addAllergy(String allergy); 
+
+  void addDiagnosis(String diagnosis) throws IOException;
+
+  void addTreatments(String treatment) throws IOException;
 }

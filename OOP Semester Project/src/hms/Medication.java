@@ -5,22 +5,32 @@ public class Medication {
     private int price;
     private int stockLevel;
     private int lowStockAlertLevel;
+    private boolean stocklevelalert; // Correct field name casing to align with standard practices
 
-
-    public Medication(String medicationName,int price, int stockLevel, int lowStockAlertLevel) {
+    public Medication(String medicationName, int price, int stockLevel, int lowStockAlertLevel) {
         this.medicationName = medicationName;
         this.price = price;
         this.stockLevel = stockLevel;
         this.lowStockAlertLevel = lowStockAlertLevel;
+        this.stocklevelalert = stockLevel < lowStockAlertLevel; // Initialize alert status
     }
 
     public String getMedicationName() {
         return medicationName;
     }
 
+    public boolean getStockLevelAlert() {
+        return stocklevelalert;
+    }
+
+    public void setStockLevelAlert(boolean alertStatus) { // Add this method
+        this.stocklevelalert = alertStatus;
+    }
+
     public int getStockLevel() {
         return stockLevel;
     }
+
     public int getPrice() {
         return price;
     }
@@ -30,20 +40,21 @@ public class Medication {
     }
 
     public void updateStockLevel(int quantity) {
-        this.stockLevel = quantity;
+        if (quantity >= 0) {
+            this.stockLevel = quantity;
+            this.stocklevelalert = stockLevel < lowStockAlertLevel; // Recalculate alert status
+        } else {
+            System.out.println("Stock level cannot be negative.");
+        }
     }
 
     public void setLowStockAlertLevel(int lowStockAlertLevel) {
-        this.lowStockAlertLevel = lowStockAlertLevel;
-    }
-    // Inventory.java
-     @Override
-    public String toString() {
-        return "InventoryItem{" +
-                "Name='" + medicationName + '\'' +
-                ", Stock=" + stockLevel +
-                ", Low Stock Level=" + lowStockAlertLevel +
-                '}';
+        if (lowStockAlertLevel >= 0) {
+            this.lowStockAlertLevel = lowStockAlertLevel;
+            this.stocklevelalert = stockLevel < lowStockAlertLevel; // Recalculate alert status
+        } else {
+            System.out.println("Low stock alert level cannot be negative.");
+        }
     }
 
     public int setPrice(int price) {
@@ -53,5 +64,13 @@ public class Medication {
             System.out.println("Price cannot be negative.");
         }
         return price;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "Medication{name='%s', price=%d, stockLevel=%d, lowStockAlertLevel=%d, stockLevelAlert=%b}",
+            medicationName, price, stockLevel, lowStockAlertLevel, stocklevelalert
+        );
     }
 }

@@ -1,12 +1,17 @@
 package hms;
 
 import hms.Appointments.Appointment;
+import hms.Billing.Billing;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class Administrator extends User {
+    private Billing billing;
     private List<Staff> staffList;
     private List<Appointment> appointmentList;
     private Inventory inventory;
@@ -22,6 +27,7 @@ public class Administrator extends User {
         staffList = new ArrayList<>();
         appointmentList = new ArrayList<>();
         inventory = new Inventory();
+        billing=new Billing();
         loadStaffData();
         loadAppointmentData();
         loadInventoryData();
@@ -32,6 +38,7 @@ public class Administrator extends User {
         staffList = new ArrayList<>();
         appointmentList = new ArrayList<>();
         inventory = new Inventory();
+        billing=new Billing();
         loadStaffData();
         loadAppointmentData();
         loadInventoryData();
@@ -46,8 +53,8 @@ public class Administrator extends User {
         System.out.println("4. Manage Inventory");
         System.out.println("5. Create Bill");
         System.out.println("6. View Bills");
-        System.out.println("7. View Patient Feedback");
-        System.out.println("8. Verify Blockchain Integrity");
+        System.out.println("7. Verify Blockchain Integrity");
+        System.out.println("8. View Feedback");
         System.out.println("9. Log Out");
         choice = scanner.nextInt();
         scanner.nextLine();
@@ -71,13 +78,14 @@ public class Administrator extends User {
                 viewBills();
                 break;
             case 7:
-                viewFeedback();
+                verifyBlockchain();
                 break;
             case 8:
-                verifyBlockchain();
+                viewFeedback();
                 break;
             case 9:
                 // Returning false just means "I want to log out and go back to the login menu"
+                System.out.println("Signed out successfully.");
                 return false;
             default:
                 System.out.println("Invalid choice. Please try again.");
@@ -95,44 +103,13 @@ public class Administrator extends User {
 
         scanner.nextLine(); // Wait for user to press Enter
     }
-    private void viewFeedback() {
-        try {
-            List<String> feedbackList = Feedback.viewAllFeedback();
-            if (feedbackList.isEmpty()) {
-                System.out.println("No feedback available.");
-            } else {
-                System.out.println("Feedback List:");
-                System.out.printf("| %-12s | %-12s | %-50s | %-6s |%n", "Feedback ID", "Patient ID", "Comments", "Rating");
-                System.out.println("+--------------+--------------+----------------------------------------------------+--------+");
-    
-                for (String feedback : feedbackList) {
-                    String[] feedbackDetails = feedback.split(",");
-                    
-                    if (feedbackDetails.length == 4) { // Ensure data integrity
-                        String feedbackId = feedbackDetails[0].trim();
-                        String patientId = feedbackDetails[1].trim();
-                        String comments = feedbackDetails[2].trim();
-                        String rating = feedbackDetails[3].trim();
-    
-                        // Break comments into multiple lines if too long
-                        List<String> wrappedComments = wrapText(comments, 50);
-                        for (int i = 0; i < wrappedComments.size(); i++) {
-                            if (i == 0) {
-                                System.out.printf("| %-12s | %-12s | %-50s | %-6s |%n", 
-                                                  feedbackId, patientId, wrappedComments.get(i), rating);
-                            } else {
-                                System.out.printf("| %-12s | %-12s | %-50s | %-6s |%n", 
-                                                  "", "", wrappedComments.get(i), "");
-                            }
-                        }
-                    }
-                }
-                System.out.println("+--------------+--------------+----------------------------------------------------+--------+");
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading feedback: " + e.getMessage());
+
+    private void ensureBillingInitialized() {
+        if (billing == null) {
+            billing = new Billing();
         }
     }
+
 
     private void manageStaff(Scanner scanner) throws IOException {
         int choice;
@@ -191,67 +168,121 @@ public class Administrator extends User {
         for (Staff staff : staffList) {
             if (staff.id.equals(id)) {
                 System.out.println("Updating Staff: " + staff);
-
-                // TODO: Confirm this. Are "role" and "gender" supposed to be updatable?
+    
+                // Update Name
                 System.out.print("Enter new Staff Name (or leave blank to keep current): ");
                 String newName = scanner.nextLine();
-                // System.out.println("Enter new Staff Role (or leave blank to keep current):");
-                // String newRole = scanner.nextLine();
-                // System.out.println("Enter new Staff Gender (or leave blank to keep
-                // current):"); // We being progressive fr
-                // String newGender = scanner.nextLine();
+                if (!newName.isEmpty()) {
+                    staff.setName(newName);
+                }
+    
+                // Update Phone Number
                 while (true) {
                     System.out.print("Enter new Staff Phone Number (or leave blank to keep current): ");
                     String phoneNumber = scanner.nextLine();
-                    if (phoneNumber.isEmpty())
-                        break;
+                    if (phoneNumber.isEmpty()) break; // Skip updating if blank
                     try {
                         staff.updatePhoneNumber(phoneNumber);
+                        break; // Exit loop if successful
                     } catch (Exception error) {
                         System.out.println(error.getMessage());
                     }
                 }
-
+    
+                // Update Email Address
                 while (true) {
                     System.out.print("Enter new Staff Email Address (or leave blank to keep current): ");
                     String email = scanner.nextLine();
-                    if (email.isEmpty())
-                        break;
+                    if (email.isEmpty()) break; // Skip updating if blank
                     try {
                         staff.updateEmailAddress(email);
+                        break; // Exit loop if successful
                     } catch (Exception error) {
                         System.out.println(error.getMessage());
                     }
                 }
-
-                if (!newName.isEmpty())
-                    staff.setName(newName);
-                // if (!newRole.isEmpty())
-                // staff.setRole(newRole);
-                // if (!newGender.isEmpty())
-                // staff.setGender(newGender);
-
-                saveStaffData(); // Save changes to the file
+    
+                // Save changes in both files
+                saveStaffData(); 
+                saveUsersData();
+    
                 System.out.println("Staff member updated successfully.");
                 return;
             }
         }
         System.out.println("Staff member not found.");
     }
+    
+    
 
     private void removeStaff(Scanner scanner) {
         System.out.println("Enter Staff ID to remove:");
         String id = scanner.nextLine();
-        for (int i = 0; i < staffList.size(); i++) {
-            if (staffList.get(i).id.equals(id)) {
-                staffList.remove(i);
-                saveStaffData(); // Save changes to the file
-                System.out.println("Staff member removed successfully.");
-                return;
-            }
+    
+        System.out.println("Staff list size before removal: " + staffList.size());
+    
+        // Remove from the in-memory list
+        boolean staffFound = staffList.removeIf(staff -> staff.id.equals(id));
+    
+        if (staffFound) {
+            saveStaffData();  // Update staff.csv to reflect changes
+            removeUserFromCSV(id);  // Remove user from users.csv
+            System.out.println("Staff member removed successfully.");
+        } else {
+            System.out.println("Staff member not found.");
         }
-        System.out.println("Staff member not found.");
+    
+        System.out.println("Staff list size after removal: " + staffList.size());
     }
+    
+
+    private void saveUsersData() {
+        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
+    
+        try {
+            List<String> updatedLines = Files.lines(Paths.get(filePath))
+                    .map(line -> {
+                        String[] parts = line.split(",");
+                        if (parts[0].equals("id")) return line; // Skip header row
+    
+                        // Update current admin's details if the ID matches
+                        if (this.id.equals(parts[0])) {
+                            return this.id + "," + this.name + "," + this.getPassword() + "," + this.role;
+                        }
+    
+                        // Check if the ID matches any staff
+                        Staff matchedStaff = staffList.stream()
+                                .filter(staff -> staff.id.equals(parts[0]))
+                                .findFirst()
+                                .orElse(null);
+    
+                        if (matchedStaff != null) {
+                            return matchedStaff.id + "," + matchedStaff.name + "," + matchedStaff.getPassword() + "," + matchedStaff.role;
+                        }
+    
+                        return line; // Preserve non-staff entries as is
+                    })
+                    .collect(Collectors.toList());
+    
+            // Ensure admin is always present in the updated lines
+            boolean adminExists = updatedLines.stream().anyMatch(line -> line.startsWith(this.id + ","));
+            if (!adminExists) {
+                updatedLines.add(this.id + "," + this.name + "," + this.getPassword() + "," + this.role);
+            }
+    
+            // Write back all updated lines
+            Files.write(Paths.get(filePath), updatedLines);
+            System.out.println("User data updated successfully, including administrator.");
+        } catch (IOException e) {
+            System.out.println("Error updating user data: " + e.getMessage());
+        }
+    }
+    
+    
+    
+
+    
+    
 
     private void filterStaff(Scanner scanner) {
         System.out.println("Filter Staff Menu:");
@@ -287,13 +318,47 @@ public class Administrator extends User {
     }
 
     private void viewAppointments(Scanner scanner) {
-        System.out.println("Viewing appointments...");
-        for (Appointment appointment : appointmentList) {
-            System.out.println(appointment);
-        }
+        viewAllAppointments();
         System.out.println("Press Enter to return to the admin menu.");
-        scanner.nextLine(); // Wait for user to press Enter
+        scanner.nextLine(); // Wait for user input
     }
+    
+    private void viewAllAppointments() {
+        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
+        
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            boolean isFirstLine = true;
+    
+            // Print a header for the table
+            System.out.printf("%-10s %-10s %-10s %-10s %-20s%n", 
+                    "ID", "Patient ID", "Doctor ID", "Status", "Date & Time");
+            System.out.println("---------------------------------------------------------------");
+    
+            while ((line = br.readLine()) != null) {
+                if (isFirstLine) {
+                    isFirstLine = false; // Skip the header row
+                    continue;
+                }
+    
+                String[] values = line.split(",");
+                String id = values[0].trim();
+                String patientId = values[1].isEmpty() ? "N/A" : values[1].trim();
+                String doctorId = values[2].isEmpty() ? "N/A" : values[2].trim();
+                String status = values[4].isEmpty() ? "N/A" : values[4].trim();
+                String dateAndTime = values[5].trim();
+    
+                // Print appointment details in a structured format
+                System.out.printf("%-10s %-10s %-10s %-10s %-20s%n", 
+                        id, patientId, doctorId, status, dateAndTime);
+            }
+    
+        } catch (IOException e) {
+            System.out.println("Error reading appointments: " + e.getMessage());
+        }
+    }
+    
+    
 
     private void manageInventory(Scanner scanner) {
         int choice;
@@ -333,64 +398,120 @@ public class Administrator extends User {
         } while (choice != 6);
     }
 
+    private void removeUserFromCSV(String userId) {
+        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
+    
+        try {
+            List<String> updatedLines = Files.lines(Paths.get(filePath))
+                    .filter(line -> !line.startsWith(userId + ","))  // Exclude the user with the given ID
+                    .collect(Collectors.toList());
+    
+            // Write back the updated list
+            Files.write(Paths.get(filePath), updatedLines);
+            System.out.println("User with ID " + userId + " removed from users.csv successfully.");
+        } catch (IOException e) {
+            System.out.println("Error removing user from users.csv: " + e.getMessage());
+        }
+    }
+    
+
     private void viewInventory(Scanner scanner) {
         System.out.println("Current Inventory:");
         inventory.loadFromCSV();
-        inventory.getMedications().forEach(System.out::println);
+    
+        System.out.printf("%-20s %-10s %-12s %-20s %-15s%n", "Medication Name", "Price", "Stock Level", "Low Stock Alert", "Stock Level Alert");
+        System.out.println("--------------------------------------------------------------------------------------------");
+    
+        for (Medication item : inventory.getMedications()) {
+            System.out.printf("%-20s %-10d %-12d %-20d %-15s%n",
+                    item.getMedicationName(),
+                    item.getPrice(),
+                    item.getStockLevel(),
+                    item.getLowStockAlertLevel(),
+                    item.getStockLevelAlert());
+        }
+    
         System.out.println("Press Enter to return to the Manage Inventory menu.");
-        scanner.nextLine(); // Wait for user to press Enter
+        scanner.nextLine(); // Pause for user input
     }
+    
+
 
     private void addInventoryItem(Scanner scanner) {
         System.out.println("Enter Medicine Name:");
         String name = scanner.nextLine();
+        System.out.println("Enter Price:");
+        int price = scanner.nextInt();
         System.out.println("Enter Initial Stock Level:");
         int stock = scanner.nextInt();
         System.out.println("Enter Low Stock Alert Level:");
         int lowStockLevel = scanner.nextInt();
-        inventory.addMedication(new Medication(name, stock, lowStockLevel));
-        saveInventoryData(); // Save changes to the file
+    
+        Medication newMedication = new Medication(name, price, stock, lowStockLevel);
+        newMedication.setStockLevelAlert(stock < lowStockLevel); // Calculate stock alert
+        inventory.addMedication(newMedication);
+    
+        inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
         System.out.println("Inventory item added successfully.");
     }
+    
 
     private void updateInventoryItem(Scanner scanner) {
         System.out.println("Enter Medicine Name to update:");
         String name = scanner.nextLine();
         Medication item = inventory.getMedication(name);
+    
         if (item != null) {
             System.out.println("Updating Inventory Item: " + item);
+    
+            System.out.println("Enter new Price (or leave blank to keep current):");
+            String newPrice = scanner.nextLine();
+    
             System.out.println("Enter new Stock Level (or leave blank to keep current):");
             String newStock = scanner.nextLine();
+    
             System.out.println("Enter new Low Stock Alert Level (or leave blank to keep current):");
             String newLowStock = scanner.nextLine();
-
-            if (!newStock.isEmpty())
-                item.updateStockLevel(Integer.parseInt(newStock));
-            if (!newLowStock.isEmpty())
+    
+            if (!newPrice.isEmpty()) {
+                item.setPrice(Integer.parseInt(newPrice));
+            }
+            if (!newStock.isEmpty()) {
+                int updatedStock = Integer.parseInt(newStock);
+                item.updateStockLevel(updatedStock);
+                item.setStockLevelAlert(updatedStock < item.getLowStockAlertLevel());
+            }
+            if (!newLowStock.isEmpty()) {
                 item.setLowStockAlertLevel(Integer.parseInt(newLowStock));
-
-            saveInventoryData(); // Save changes to the file
+            }
+    
+            inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
             System.out.println("Inventory item updated successfully.");
         } else {
             System.out.println("Inventory item not found.");
         }
     }
+    
+
 
     private void removeInventoryItem(Scanner scanner) {
         System.out.println("Enter Medicine Name to remove:");
         String name = scanner.nextLine();
+        
         if (inventory.removeMedication(name)) {
-            saveInventoryData(); // Save changes to the file
+            inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
             System.out.println("Inventory item removed successfully.");
         } else {
             System.out.println("Inventory item not found.");
         }
     }
+    
+    
 
     private void approveReplenishmentRequest(Scanner scanner) {
         System.out.println("Enter Replenishment Request ID to approve:");
         String requestID = scanner.nextLine();
-        List<ReplenishmentRequest> requests = ReplenishmentRequest.loadFromCSV("../data/replenishment_requests.csv");
+        List<ReplenishmentRequest> requests = ReplenishmentRequest.loadFromCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\replenishment_requests.csv");
 
         for (ReplenishmentRequest request : requests) {
             if (request.getRequestID().equals(requestID)) {
@@ -411,7 +532,7 @@ public class Administrator extends User {
     }
 
     private void saveReplenishmentRequests(List<ReplenishmentRequest> requests) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("../data/replenishment_requests.csv"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\replenishment_requests.csv"))) {
             writer.println("requestID,medicationName,quantity,status");
             for (ReplenishmentRequest request : requests) {
                 writer.printf("%s,%s,%d,%s%n", request.getRequestID(), request.getMedicationName(), request.getQuantity(), request.getStatus());
@@ -421,52 +542,135 @@ public class Administrator extends User {
         }
     }
 
-    private void createBill(Scanner scanner) throws IOException {
+    public void createBill(Scanner scanner) throws IOException {
+        ensureBillingInitialized();  // Add this line to make sure billing is initialized
+int count=0;
         System.out.print("Enter patient ID: ");
         String patientId = scanner.nextLine();
-        System.out.print("Enter description: ");
-        String description = scanner.nextLine();
-        System.out.print("Enter amount: ");
-        double amount = scanner.nextDouble();
-        scanner.nextLine(); // Consume newline
-    
-        Billing.Bill bill = new Billing.Bill(generateId(), patientId, description, amount, false);
-        Billing.addBill(bill);
-        System.out.println("Bill created successfully: " + bill);
+
+        List<String> prescriptionIds = new ArrayList<>();
+        while (true) {
+            System.out.print("Enter prescription ID: ");
+            String prescriptionId = scanner.nextLine();
+            if (!prescriptionId.isEmpty()) {
+                prescriptionIds.add(prescriptionId);
+                count+=1;
+            }
+
+            System.out.print("Do you want to add another prescription? (yes/no): ");
+            String response = scanner.nextLine();
+            if (response.equalsIgnoreCase("no")) {
+                break;
+            }
+        }
+if(count!=0) {
+    String billId = generateId(); // Generate a unique bill ID
+
+    try {
+        billing.addBill(billId, patientId, prescriptionIds);
+        System.out.println("Bill created successfully with ID: " + billId);
+    } catch (Exception e) {
+        System.out.println("Failed to create bill: " + e.getMessage());
+    }
+}
     }
 
-    private void viewBills() throws IOException {
-        List<Billing.Bill> bills = Billing.getAllBills();
+    public void viewBills() throws IOException {
+        ensureBillingInitialized(); // Ensure that the billing is initialized
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter Patient ID: ");
+        String patientId = scanner.nextLine();
+
+        List<Billing.Bill> bills = billing.getBillsByPatientId(patientId);
         if (bills.isEmpty()) {
-            System.out.println("No bills found.");
+            System.out.println("No bills found for patient ID: " + patientId);
             return;
         }
-    
-        System.out.println("List of Bills:");
-        for (Billing.Bill bill : bills) {
-            System.out.println(bill);
-        }
-    }
 
+        // Print the header for better readability
+        System.out.printf("%-15s %-12s %-50s %-10s %-6s%n", "Bill ID", "Patient ID", "Description", "Amount", "Is Paid");
+        System.out.println("---------------------------------------------------------------------------------------------------------");
+
+        // Print each bill
+        for (Billing.Bill bill : bills) {
+            bill.viewBill(bill);
+        }
+
+        System.out.println("---------------------------------------------------------------------------------------------------------");
+    }
     private String generateId() {
         return "BILL" + System.currentTimeMillis();
     }
-    
+
+    private void viewFeedback() {
+        try {
+            List<String> feedbackList = Feedback.viewAllFeedback();
+            if (feedbackList.isEmpty()) {
+                System.out.println("No feedback available.");
+            } else {
+                System.out.println("Feedback List:");
+                System.out.printf("| %-12s | %-12s | %-50s | %-6s |%n", "Feedback ID", "Patient ID", "Comments", "Rating");
+                System.out.println("+--------------+--------------+----------------------------------------------------+--------+");
+
+                for (String feedback : feedbackList) {
+                    String[] feedbackDetails = feedback.split(",");
+
+                    if (feedbackDetails.length == 4) { // Ensure data integrity
+                        String feedbackId = feedbackDetails[0].trim();
+                        String patientId = feedbackDetails[1].trim();
+                        String comments = feedbackDetails[2].trim();
+                        String rating = feedbackDetails[3].trim();
+
+                        // Break comments into multiple lines if too long
+                        List<String> wrappedComments = wrapText(comments, 50);
+                        for (int i = 0; i < wrappedComments.size(); i++) {
+                            if (i == 0) {
+                                System.out.printf("| %-12s | %-12s | %-50s | %-6s |%n",
+                                        feedbackId, patientId, wrappedComments.get(i), rating);
+                            } else {
+                                System.out.printf("| %-12s | %-12s | %-50s | %-6s |%n",
+                                        "", "", wrappedComments.get(i), "");
+                            }
+                        }
+                    }
+                }
+                System.out.println("+--------------+--------------+----------------------------------------------------+--------+");
+            }
+        } catch (IOException e) {
+            System.out.println("Error loading feedback: " + e.getMessage());
+        }
+    }
+
+    // Helper method to wrap text to a specified width
+    private List<String> wrapText(String text, int width) {
+        List<String> wrappedLines = new ArrayList<>();
+        int start = 0;
+        while (start < text.length()) {
+            int end = Math.min(start + width, text.length());
+            wrappedLines.add(text.substring(start, end));
+            start = end;
+        }
+        return wrappedLines;
+    }
+
+
+
     private void verifyBlockchain() {
         if (Billing.verifyBlockchain()) {
             System.out.println("Blockchain is valid.");
         } else {
             System.out.println("Blockchain integrity compromised!");
-        }        
+        }
     }
-    
+
 
     private void loadStaffData() {
 
         try {
             this.staffList.clear();
 
-            BufferedReader file = new BufferedReader(new FileReader("../data/users.csv"));
+            BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"));
             String nextLine = file.readLine();
             while ((nextLine = file.readLine()) != null) {
                 String[] user = nextLine.split(",");
@@ -490,66 +694,57 @@ public class Administrator extends User {
         // Implement file loading logic for appointment data
         // You can follow a similar structure to loadStaffData
     }
-
     private void loadInventoryData() {
-        try (BufferedReader br = new BufferedReader(new FileReader("../data/inventory.csv"))) {
-            String line;
-            boolean isFirstLine = true;
-            while ((line = br.readLine()) != null) {
-                if (isFirstLine) {
-                    isFirstLine = false;
-                    continue; // Skip the header line
-                }
-                String[] data = line.split(",");
-                if (data.length == 3) {
-                    try {
-                        int stockLevel = Integer.parseInt(data[1]);
-                        int lowStockAlertLevel = Integer.parseInt(data[2]);
-                        inventory.addMedication(new Medication(data[0], stockLevel, lowStockAlertLevel));
-                    } catch (NumberFormatException e) {
-                        System.out.println("Invalid data format in inventory file: " + line);
-                    }
-                } else {
-                    System.out.println("Invalid data format in inventory file: " + line);
-                }
-            }
-        } catch (IOException e) {
-            System.out.println("Error loading inventory data: " + e.getMessage());
-        }
+        inventory.loadFromCSV();
     }
+    
+
     private void saveStaffData() {
-        for (Staff staff : staffList) {
-            try {
-                staff.save();
-            } catch (IOException e) {
-                System.out.println("Error saving staff data: " + e.getMessage());
+        String staffFilePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\staff.csv";
+    
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(staffFilePath))) {
+            // Write the header
+            writer.write("id,gender,age,role,phoneNumber,email,specialization");
+            writer.newLine();
+    
+            // Write only the current in-memory staff data to the file
+            for (Staff staff : staffList) {
+                writer.write(String.format("%s,%s,%d,%s,%s,%s,%s",
+                        staff.id,
+                        staff.getGender(),
+                        staff.age,
+                        staff.getRole(),
+                        staff.phoneNumber,
+                        staff.emailAddress,
+                        staff.specialization));
+                writer.newLine();
             }
+            System.out.println("Staff data saved successfully.");
+        } catch (IOException e) {
+            System.out.println("Error saving staff data: " + e.getMessage());
         }
-        // try (BufferedWriter bw = new BufferedWriter(new
-        // FileWriter("staff_data.csv"))) {
-        // for (Staff staff : staffList) {
-        // bw.write(staff.id + "," + staff.name + "," + staff.getRole() + "," +
-        // staff.getGender());
-        // bw.newLine();
-        // }
-        // } catch (IOException e) {
-        // System.out.println("Error saving staff data: " + e.getMessage());
-        // }
     }
+    
 
     private void saveInventoryData() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("../data/inventory.csv"))) {
-            // Write the header
-            bw.write("medicationName,stockLevel,lowStockAlertLevel");
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv"))) {
+            // Write the header with 5 fields
+            bw.write("medicationName,price,stockLevel,lowStockAlertLevel,stockLevelAlert");
             bw.newLine();
-
-            // Write the medication data
+    
+            // Write each medication's data
             for (Medication item : inventory.getMedications()) {
-                bw.write(item.getMedicationName() + "," + item.getStockLevel() + "," + item.getLowStockAlertLevel());
-                bw.newLine();
+                bw.write(String.format("%s,%d,%d,%d,%b%n",
+                        item.getMedicationName(),
+                        item.getPrice(),
+                        item.getStockLevel(),
+                        item.getLowStockAlertLevel(),
+                        item.getStockLevelAlert())); // Save alert as true/false
             }
         } catch (IOException e) {
             System.out.println("Error saving inventory data: " + e.getMessage());
         }
     }
+    
+
 }

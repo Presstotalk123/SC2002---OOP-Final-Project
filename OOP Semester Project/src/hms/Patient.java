@@ -1,15 +1,14 @@
 package hms;
-
 import hms.Appointments.Appointment;
 import hms.Appointments.AppointmentPatientView;
 import hms.Appointments.AppointmentStatus;
+import hms.Billing.Billing;
 import hms.MedicalRecords.MedicalRecordPatientView;
 import hms.MedicalRecords.MedicalRecords;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Scanner;
+import java.util.*;
 
 public class Patient extends User {
     // Store MedicalRecord as a PatientView so only Patient methods are exposed.
@@ -18,16 +17,16 @@ public class Patient extends User {
     // Prompt for information about patient
     public Patient(Scanner scanner) throws IOException {
         super(scanner, "patient"); // Creates base User
-
+        
         try {
             super.save(); // Save to users.csv
         } catch (IOException error) {
             System.out.println("Unable to save user " + name + " due to IOException: " + error.getMessage());
         }
-
+        
         this.patientRecord = new MedicalRecords(scanner, this.id, this.name); // Create Patient Medical Record
-
-        // Save the new MedicalRecord to medical_record.csv immediately
+        
+        // Save the new MedicalRecord to Patient.csv immediately
         try {
             this.patientRecord.saveToFile();
             System.out.println("Medical Record for Patient saved successfully.");
@@ -35,21 +34,20 @@ public class Patient extends User {
             System.out.println("Error saving Medical Record: " + error.getMessage());
         }
     }
-
+    
     public Patient(String id, String name, String password) throws IOException {
         super(id, name, password, "patient");
-
+    
         this.patientRecord = MedicalRecords.getRecord(this, id);
-
-        // Don't create a new Scanner, will lead to memory leaks.
-        // Also multiple scanners is very buggy in Java.
-        // if (this.patientRecord == null) {
-        // this.patientRecord = new MedicalRecords(new Scanner(System.in), id, name);
-        // this.patientRecord.saveToFile(); // Save new MedicalRecords if not found
-        // }
+        
+        if (this.patientRecord == null) {
+            this.patientRecord = new MedicalRecords(new Scanner(System.in), id, name); 
+            this.patientRecord.saveToFile(); // Save new MedicalRecords if not found
+        }
     }
-
-    public boolean eventLoop(Scanner scanner) {
+    
+    
+    public boolean eventLoop(Scanner scanner) throws IOException {
         System.out.print("""
                 Patient Menu:
                 1. View Medical Records
@@ -58,16 +56,19 @@ public class Patient extends User {
                 4. Reschedule/Cancel Existing Appointment
                 5. View all your Appointment Statuses
                 6. View Appointment Outcome Records
-                7. Log Out
-                8. Leave Feedback
+                7. Add past diagnosis and treatment
+                8. Add Allergy to Medical Record
+                9. Pay Bill
+                10. Give Feedback
+                11. Log Out
                 Enter your choice:""");
         int choice = scanner.nextInt();
         scanner.nextLine();
         System.out.println("");
         switch (choice) {
             case 1:
-                System.out.println(this.patientRecord);
-                break;
+             viewMedicalRecord();
+             break;
             case 2:
                 System.out.print("Enter a new email address (leave blank to keep existing value): ");
                 String newEmail = scanner.nextLine();
@@ -94,127 +95,66 @@ public class Patient extends User {
                 this.viewAppointmentStatuses();
                 break;
             case 6:
-                this.viewAppointmentOutcomeRecords();
+                this.viewAppointmentOutcomeRecords(scanner);
                 break;
             case 7:
-                return false;
+                System.out.println("Select the service:\n1. Add past Diagnosis\n2. Add past Treatment");
+                int choice1 = scanner.nextInt();
+                Scanner scanner1 = new Scanner(System.in);
+                switch (choice1){
+                    case 1:
+                        System.out.println("Enter the Past Diagnosis diagnosis: ");
+                        String diagnosis = scanner1.nextLine();
+                        this.patientRecord.addDiagnosis(diagnosis);
+                        break;
+                    case 2:
+                        System.out.println("Enter the Past treatment: ");
+                        String treatment = scanner1.nextLine();
+                        this.patientRecord.addTreatments(treatment);
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please enter a number from 1 to 2.");
+                        break;
+                }
+                break;
             case 8:
+                this.addAllergyToMedicalRecord(scanner);
+                break;
+            case 9:
+                this.payBill(scanner);
+                break;
+            case 10:
                 this.giveFeedback(scanner);
                 break;
+            case 11:
+                System.out.println("Signed out successfully.");
+                return false;
             default:
                 System.out.println("Invalid choice. Please enter a number from 1 to 7.");
                 break;
         }
         return true;
     }
-
-    private void giveFeedback(Scanner scanner) {
-
-        System.out.println("What was you experience with our hospital management system? How can we improve?");
-        String comments = scanner.nextLine();
-
-        int rating = 0;
-
-        while (true) {
-            System.out.print("Please rate your experience from 1 to 5: ");
-            try {
-                rating = scanner.nextInt();
-                scanner.nextLine();
-                break;
-            } catch (NumberFormatException error) {
-                System.out.println("Invalid Input!");
-            }
-        }
-
-        System.out.println("Thank you for your feedback!");
-
-        Feedback feedback = new Feedback(this.id, comments, rating);
+    public void rescheduleOrCancelAppointment(Scanner scanner) {
         try {
-            feedback.save();
-        } catch (IOException e) {
-            System.out.println("error occurred saving feedback: " + e.getMessage());
-        }
-
-    }
-
-    private void viewAppointmentOutcomeRecords() {
-        List<AppointmentOutcomeRecord> records = AppointmentOutcomeRecord.getAllRecords();
-        for (AppointmentOutcomeRecord apptOutcome : records) {
-            AppointmentPatientView selectedAppt = null;
-
-            if (!apptOutcome.getPatientID().equals(this.id)) {
-                continue;
-            }
-
-            try {
-                List<AppointmentPatientView> appts = AppointmentPatientView.loadAllAppointments();
-                for (AppointmentPatientView appt : appts) {
-                    if (appt.getId().equals(apptOutcome.getAppointmentID())) {
-                        selectedAppt = appt;
-                    }
-                }
-    
-                if (selectedAppt == null) {
-                    continue;
-                }
-
-                String tableFormatter = "| %-10s | %-8s | %-18s | %-13s | %-34s | %-34s | %-44s | %-52s | %n";
-
-                System.out.println("+------------+----------+--------------------+---------------+------------------------------------+------------------------------------+----------------------------------------------+------------------------------------------------------+");
-                System.out.println("|                                                                                                             Appointment Outcome Records:                                                                                                   |");
-                System.out.println("+------------+----------+--------------------+---------------+------------------------------------+------------------------------------+----------------------------------------------+------------------------------------------------------+");
-                System.out.println("| Date       | Time     | Doctor Name        | Service Type  | Diagnosis                          | Treatment Plan                     | Prescriptions                                | Consultation Notes                                   |");
-                System.out.println("+------------+----------+--------------------+---------------+------------------------------------+------------------------------------+----------------------------------------------+------------------------------------------------------+");
-
-                System.out.format(tableFormatter, selectedAppt.getDateString(), selectedAppt.getTimeString(), selectedAppt.getDoctor().name, apptOutcome.getServiceType(), apptOutcome.getDiagnosis(), apptOutcome.getTreatmentPlan(), String.join(", ", apptOutcome.getPrescribedMedications().stream().map(a -> a.getMedicationName()).toList()), apptOutcome.getConsultationNotes());
-
-                System.out.println("+------------+----------+--------------------+---------------+------------------------------------+------------------------------------+----------------------------------------------+------------------------------------------------------+");
-
-
-            }
-
-            catch (IOException e) {
-                continue;
-            }
-
-        }
-    }
-
-    private void rescheduleOrCancelAppointment(Scanner scanner) {
-        System.out.println("To reschedule an appointment, you need to cancel an existing appointment.");
-        System.out.println("After cancelling, you'll be asked if you want to schedule a new appointment.\n");
-        
-        String tableFormatter = "| %-4s | %-10s | %-8s | %-18s | %-18s |%n";
-
-        System.out.println("+------+------------+----------+--------------------+--------------------+");
-        System.out.println("|                Please choose an appointment to cancel:                 |");
-        System.out.println("+------+------------+----------+--------------------+--------------------+");
-        System.out.println("| ID   | Date       | Time     | Doctor Name        | Specialisation     |");
-        System.out.println("+------+------------+----------+--------------------+--------------------+");
-
-        try {
-            List<AppointmentPatientView> appts = AppointmentPatientView.loadAllAppointments();
-            Iterator<AppointmentPatientView> it = appts.iterator();
+            System.out.println("To reschedule an appointment, you need to cancel an existing appointment.");
+            System.out.println("After cancelling, you'll be asked if you want to schedule a new appointment.");
+            System.out.println(
+                    "Please choose an appointment to cancel:\n");
+            List<Appointment> appts = AppointmentPatientView.loadAllAppointments();
+            Iterator<Appointment> it = appts.iterator();
             boolean foundAnyAppts = false;
-
             while (it.hasNext()) {
                 AppointmentPatientView appt = it.next();
                 if (appt.getPatientId().isPresent() && appt.getPatientId().get().equals(this.id)) {
-
-                    Doctor apptDoctor = appt.getDoctor();
-                    System.out.format(tableFormatter, appt.getId(), appt.getDateString(), appt.getTimeString(), apptDoctor.name,
-                            apptDoctor.specialization);
+                    System.out.println("(" + appt.getId() + ") - " + appt.getDateTime().toString());
                     foundAnyAppts = true;
                 }
             }
             if (!foundAnyAppts) {
-                System.out.println("|                    You have no booked appointments!                    |");
-                System.out.println("+------+------------+----------+--------------------+--------------------+");
+                System.out.println("You have no booked appointments!\n");
                 return;
             }
-
-            System.out.println("+------+------------+----------+--------------------+--------------------+");
-
             System.out.println("");
             System.out.print("Enter the ID of the appointment you want to cancel: ");
             String selectedAppointmentId = scanner.nextLine();
@@ -257,112 +197,208 @@ public class Patient extends User {
             error.printStackTrace();
         }
     }
-
-    private void scheduleAppointment(Scanner scanner) {
-
-        String tableFormatter = "| %-4s | %-10s | %-8s | %-18s | %-18s |%n";
-
-        System.out.println("+------+------------+----------+--------------------+--------------------+");
-        System.out.println("|                Here are all the Available appointments:                |");
-        System.out.println("+------+------------+----------+--------------------+--------------------+");
-        System.out.println("| ID   | Date       | Time     | Doctor Name        | Specialisation     |");
-        System.out.println("+------+------------+----------+--------------------+--------------------+");
-
-        try {
-            List<AppointmentPatientView> appts = AppointmentPatientView.loadAllAppointments();
-            Iterator<AppointmentPatientView> it = appts.iterator();
-            boolean foundAnyAppts = false;
-
-            while (it.hasNext()) {
-                AppointmentPatientView appt = it.next();
-                if (appt.isBookable()) {
-
-                    Doctor apptDoctor = appt.getDoctor();
-                    System.out.format(tableFormatter, appt.getId(), appt.getDateString(), appt.getTimeString(), apptDoctor.name,
-                            apptDoctor.specialization);
-                    foundAnyAppts = true;
+    public void scheduleAppointment(Scanner scanner) {
+    try {
+        List<Appointment> appts = AppointmentPatientView.loadAllAppointments();
+        System.out.println("Here are all the available appointments:");
+        Iterator<Appointment> it = appts.iterator();
+        boolean foundAnyAppts = false;
+        
+        while (it.hasNext()) {
+            AppointmentPatientView appt = it.next();
+            if (appt.isBookable()) {
+                System.out.println("(" + appt.getId() + ") - " + appt.getDateTime().toString());
+                foundAnyAppts = true;
+            }
+        }
+        
+        if (!foundAnyAppts) {
+            System.out.println("No more available appointments!\n");
+            return;
+        }
+        
+        System.out.print("Enter the ID of the appointment you want to book: ");
+        String selectedAppointmentId = scanner.nextLine();
+        boolean wasBookingSuccessful = false;
+        
+        it = appts.iterator();
+        while (it.hasNext()) {
+            AppointmentPatientView appt = it.next();
+            if (appt.getId().equals(selectedAppointmentId)) {
+                // Set patient ID and status to Pending
+                appt.schedule(this.id);  // Assign patient ID
+                if (appt instanceof Appointment) {  // Ensure it's a modifiable instance
+                    ((Appointment) appt).setStatus(Optional.of(AppointmentStatus.pending));
                 }
+                
+                appt.save();  // Save the updated appointment
+                wasBookingSuccessful = true;
+                break;
+            }
+        }
+        
+        if (!wasBookingSuccessful) {
+            System.out.println("Invalid Appointment ID! Returning to main menu...");
+        } else {
+            System.out.println("Booking was successful! Appointment status is now PENDING.");
+        }
+        
+    } catch (IOException error) {
+        System.out.println("Error occurred scheduling new appointment: ");
+        error.printStackTrace();
+    }
+}
+
+
+    private void viewAppointmentOutcomeRecords(Scanner scanner) {
+    System.out.print("Enter the appointment ID to search: ");
+    String searchAppointmentId = scanner.nextLine();
+    String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointment_outcome_records.csv";
+
+    try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+        String line;
+        int recordFound = 0;
+
+        while ((line = br.readLine()) != null) {
+            String[] record = line.split(",");
+
+            if (record.length < 5) {
+                System.err.println("Skipping malformed record: " + line);
+                continue;  // Skip malformed records
             }
 
-            if (!foundAnyAppts) {
-                System.out.println("|                      No more available appointments                    |");
-                System.out.println("+------+------------+----------+--------------------+--------------------+");
-                return;
+            if (record[0].equals(searchAppointmentId)) {
+                System.out.println("Appointment ID: " + record[0]);
+                System.out.println("Date of Appointment: " + new Date(Long.parseLong(record[1])));
+                System.out.println("Service Type: " + record[2]);
+                System.out.println("Prescribed Medications: " + record[3].replace(";", ", "));
+                System.out.println("Consultation Notes: " + record[4]);
+                System.out.println();  // Blank line between records
+                recordFound +=1;
             }
-
-            System.out.println("+------+------------+----------+--------------------+--------------------+");
-
-
-            System.out.print("\nEnter the ID of the appointment you want to book: ");
-            String selectedAppointmentId = scanner.nextLine();
-            boolean wasBookingSuccessful = false;
-
-            it = appts.iterator();
-            while (it.hasNext()) {
-                AppointmentPatientView appt = it.next();
-                if (appt.getId().equals(selectedAppointmentId)) {
-                    // Set patient ID and status to Pending
-                    appt.schedule(this.id); // Assign patient ID
-                    if (appt instanceof Appointment) { // Ensure it's a modifiable instance
-                        ((Appointment) appt).setStatus(Optional.of(AppointmentStatus.pending));
-                    }
-
-                    appt.save(); // Save the updated appointment
-                    wasBookingSuccessful = true;
-                    break;
-                }
-            }
-
-            if (!wasBookingSuccessful) {
-                System.out.println("Invalid Appointment ID! Returning to main menu...");
-            } else {
-                System.out.println("Booking was successful! Appointment status is now PENDING.\n");
-            }
-
-        } catch (IOException error) {
-            System.out.println("Error occurred scheduling new appointment: ");
-            error.printStackTrace();
         }
 
+        if (recordFound==0) {
+            System.out.println("No record found for Appointment ID: " + searchAppointmentId);
+        }
+
+    } catch (IOException e) {
+        System.out.println("Error reading appointment outcome records: " + e.getMessage());
+    } catch (NumberFormatException e) {
+        System.out.println("Error parsing date in record. Record might be malformed.");
+    }
+}
+
+public void viewMedicalRecord() {
+    try {
+        // Fetch the medical record for the currently logged-in patient using an exact ID match
+        MedicalRecordPatientView record = MedicalRecords.getRecord(this, this.id);
+        if (record != null) {
+            System.out.println("Medical Record for Patient ID: " + this.id);
+            System.out.println(record.toString());
+        } else {
+            System.out.println("No medical record found for Patient ID: " + this.id);
+        }
+    } catch (Exception e) {
+        System.out.println("Error accessing medical record: " + e.getMessage());
+    }
+}
+
+
+
+private void giveFeedback(Scanner scanner) {
+    System.out.println("What was your experience with our hospital management system? How can we improve?");
+    String comments = scanner.nextLine().trim();
+
+    // Validate non-empty feedback.
+    while (comments.isEmpty()) {
+        System.out.println("Feedback cannot be empty. Please provide your feedback:");
+        comments = scanner.nextLine().trim();
     }
 
-    private void viewAppointmentStatuses() {
-        String tableFormatter = "| %-4s | %-10s | %-8s | %-18s | %-18s | %-10s |%n";
-
-        System.out.println("+------+------------+----------+--------------------+--------------------+------------+");
-        System.out.println("|                  Here are all your appointments and their statuses:                 |");
-        System.out.println("+------+------------+----------+--------------------+--------------------+------------+");
-        System.out.println("| ID   | Date       | Time     | Doctor Name        | Specialisation     | Status     |");
-        System.out.println("+------+------------+----------+--------------------+--------------------+------------+");
-
-
+    int rating = 0;
+    while (true) {
+        System.out.print("Please rate your experience from 1 to 5: ");
         try {
-            List<AppointmentPatientView> appts = AppointmentPatientView.loadAllAppointments();
-            Iterator<AppointmentPatientView> it = appts.iterator();
-            boolean foundAnyAppts = false;
+            rating = Integer.parseInt(scanner.nextLine().trim());
+            if (rating < 1 || rating > 5) {
+                throw new NumberFormatException();
+            }
+            break;
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid input! Please enter a number between 1 and 5.");
+        }
+    }
 
+    // Create a Feedback object and save it.
+    Feedback feedback = new Feedback(this.id, comments, rating);
+    try {
+        feedback.save();
+        System.out.println("Thank you for your feedback!");
+    } catch (IOException e) {
+        System.out.println("An error occurred while saving your feedback: " + e.getMessage());
+    }
+}
+
+
+    public void viewAppointmentStatuses() {
+        try {
+            System.out.println("Here are all your booked appointments and their statuses:\n");
+            List<Appointment> appts = AppointmentPatientView.loadAllAppointments();
+            Iterator<Appointment> it = appts.iterator();
+            boolean foundAnyAppts = false;
             while (it.hasNext()) {
                 AppointmentPatientView appt = it.next();
                 if (appt.getPatientId().isPresent() && appt.getPatientId().get().equals(this.id)) {
-
-                    Doctor apptDoctor = appt.getDoctor();
-                    System.out.format(tableFormatter, appt.getId(), appt.getDateString(), appt.getTimeString(), apptDoctor.name,
-                            apptDoctor.specialization, appt.getStatus().get());
+                    Optional<AppointmentStatus> status = appt.getStatus();
+                    System.out.println(
+                            "(" + appt.getId() + ") - " + appt.getDateTime().toString() + " - " + (status.isEmpty()
+                                    ? "PENDING"
+                                    : status.get().toString().toUpperCase()));
                     foundAnyAppts = true;
                 }
             }
-
             if (!foundAnyAppts) {
-                System.out.println("|                          No currently scheduled appointments                        |");
-                System.out.println("+------+------------+----------+--------------------+--------------------+------------+\n");
+                System.out.println("You have no booked appointments!\n");
                 return;
             }
-
-            System.out.println("+------+------------+----------+--------------------+--------------------+------------+\n");
-
+            System.out.println("");
+            
         } catch (IOException error) {
             System.out.println("Error occurred retrieving your appointment: ");
             error.printStackTrace();
         }
     }
+    private void payBill(Scanner scanner) {
+        System.out.print("Enter the bill ID to pay: ");
+        String billId = scanner.nextLine();
+        try {
+            Billing bill = new Billing();
+            bill.paybill(billId);
+            System.out.println("Bill paid successfully.");
+        } catch (IOException e) {
+            System.out.println("Error occurred while paying the bill: " + e.getMessage());
+        }
+    }
+
+    private void addAllergyToMedicalRecord(Scanner scanner) {
+        System.out.print("Enter a new allergy to add: ");
+        String allergy = scanner.nextLine().trim();
+    
+        if (allergy.isEmpty()) {
+            System.out.println("Allergy cannot be empty. Try again.");
+            return;
+        }
+    
+        // Add allergy to the medical record.
+        patientRecord.addAllergy(allergy);
+    
+        try {
+            patientRecord.saveToFile();  // Save updated medical record.
+            System.out.println("Allergy added and saved successfully!");
+        } catch (IOException e) {
+            System.out.println("Error saving updated medical record: " + e.getMessage());
+        }
+    }
+    
 }
