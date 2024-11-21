@@ -9,6 +9,12 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * The {@code Staff} class is an abstract class that extends {@link User} and represents staff members in the hospital management system.
+ * It includes additional attributes specific to staff, such as gender, age, phone number, email address, and specialization.
+ */
+
+
 public abstract class Staff extends User {
     public Gender gender;
     public int age;
@@ -17,6 +23,15 @@ public abstract class Staff extends User {
 
     public String specialization = "NA";
 
+    /**
+     * Constructs a new {@code Staff} object by prompting the user for input via a {@code Scanner}.
+     * This constructor is typically used when creating a new staff member.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @param role    The role of the staff member (e.g., "doctor", "pharmacist").
+     * @throws IOException If an I/O error occurs during saving.
+     */
+    
     public Staff(Scanner scanner, String role) throws IOException {
         super(scanner, role);
         try {
@@ -85,6 +100,18 @@ public abstract class Staff extends User {
 
     }
 
+    /**
+     * Constructs a new {@code Staff} object by loading staff data from a file.
+     * This constructor is typically used when loading an existing staff member.
+     *
+     * @param id       The ID of the staff member.
+     * @param name     The name of the staff member.
+     * @param password The password of the staff member.
+     * @param role     The role of the staff member.
+     * @throws IOException If an I/O error occurs during loading staff data.
+     */
+
+
     public Staff(String id, String name, String password, String role) throws IOException {
         super(id, name, password, role);
         String[] staffData = Staff.loadStaffDataFromFile(id);
@@ -104,6 +131,13 @@ public abstract class Staff extends User {
     public String getGender() {
         return this.gender.toString().toLowerCase();
     }
+
+    /**
+     * Updates the phone number of the staff member after validating it.
+     *
+     * @param phoneNumber The new phone number to set (must be an 8-digit number).
+     * @throws Exception If the phone number is invalid.
+     */
 
     public void updatePhoneNumber(String phoneNumber) throws Exception {
         if (phoneNumber.matches("^([0-9]{8})$")) { // Validate 8-digit phone number
@@ -125,6 +159,14 @@ public abstract class Staff extends User {
         this.name = name;
     }
 
+    /**
+     * Saves the staff member's data to the staff CSV file.
+     * If the staff member already exists, their data is updated; otherwise, a new entry is added.
+     *
+     * @throws IOException If an I/O error occurs during saving.
+     */
+
+    
     public void save() throws IOException {
         // staff.csv: id,gender,age,role,phoneNumber,email
         List<String> lines = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\staff.csv"));
@@ -153,6 +195,14 @@ public abstract class Staff extends User {
 
         output.close();
     }
+
+    /**
+     * Loads staff data from the staff CSV file based on the given staff ID.
+     *
+     * @param id The ID of the staff member.
+     * @return An array of strings containing the staff data.
+     * @throws IOException If an I/O error occurs or if the staff data is missing or invalid.
+     */
 
     private static String[] loadStaffDataFromFile(String id) throws IOException {
         BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\staff.csv"));
