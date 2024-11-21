@@ -3,6 +3,13 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The {@code Billing} class handles all billing-related functionalities,
+ * such as adding bills, calculating bill amounts, updating billing status,
+ * and verifying the integrity of the billing blockchain.
+ * It implements both {@code billingAdmin} and {@code billingPatient} interfaces.
+ */
+
 public class Billing implements billingAdmin,billingPatient{
     private static final String BILLING_FILE = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\billing.csv";
     private static final String BLOCKCHAIN_FILE = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\blockchain.dat";
@@ -20,6 +27,10 @@ public class Billing implements billingAdmin,billingPatient{
     }
 
 
+    /**
+     * Represents an individual bill with details such as bill ID, patient ID,
+     * description, amount, and payment status.
+     */
 
     public class Bill {
             public String id;
@@ -27,7 +38,17 @@ public class Billing implements billingAdmin,billingPatient{
             public String description;
             public double amount;
             public boolean paid;
-
+        
+            /**
+         * Constructs a new {@code Bill} instance with the specified details.
+         *
+         * @param id          The unique identifier for the bill.
+         * @param patientId   The patient ID associated with the bill.
+         * @param description The description of the bill.
+         * @param amount      The total amount of the bill.
+         * @param paid        The payment status of the bill.
+         */
+        
             public Bill(String id, String patientId, String description, double amount, boolean paid) {
                 this.id = id;
                 this.patientId = patientId;
@@ -36,11 +57,22 @@ public class Billing implements billingAdmin,billingPatient{
                 this.paid = paid;
             }
 
+        /**
+         * Returns a string representation of the bill in CSV format.
+         *
+         * @return A CSV-formatted string of the bill.
+         */
+
             @Override
             public String toString() {
                 return String.format("\"%s\",\"%s\",\"%s\",%.2f,%b", id, patientId, description.replace("\"", "\"\""), amount, paid);
             }
 
+        /**
+         * Displays the bill details in a formatted manner.
+         *
+         * @param bill The {@code Bill} object to be viewed.
+         */
             public void viewBill(Bill bill) {
                 System.out.printf("%-15s %-12s %-50s %-10.2f %-6b%n",
                         bill.id,
@@ -51,7 +83,15 @@ public class Billing implements billingAdmin,billingPatient{
             }
         }
 
-
+    /**
+     * Adds a new bill for a patient based on the given prescription IDs.
+     *
+     * @param billId         The unique identifier for the bill.
+     * @param patientId      The patient ID.
+     * @param prescriptionIds A list of prescription IDs associated with the bill.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+    
     public void addBill(String billId, String patientId, List<String> prescriptionIds) throws IOException {
         if (!isValidPatient(patientId)) {
             System.out.println("Invalid patient ID: " + patientId);
@@ -85,6 +125,14 @@ public class Billing implements billingAdmin,billingPatient{
         updateBillingFile(bill);
     }
 
+    /**
+     * Checks if the given patient ID is valid by verifying it against the users CSV file.
+     *
+     * @param patientId The patient ID to validate.
+     * @return {@code true} if the patient ID is valid; {@code false} otherwise.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+    
     private boolean isValidPatient(String patientId) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"))) {
             String line;
@@ -98,6 +146,15 @@ public class Billing implements billingAdmin,billingPatient{
         }
         return false;
     }
+
+    /**
+     * Checks if the given prescription ID has a status of "Dispensed".
+     *
+     * @param prescriptionId The prescription ID to check.
+     * @return {@code true} if the prescription is dispensed; {@code false} otherwise.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+    
     private boolean isPrescriptionDispensed(String prescriptionId) throws IOException {
         try (BufferedReader prescriptionReader = new BufferedReader(new FileReader(PRESCRIPTION_FILE))) {
             String line;
@@ -112,6 +169,15 @@ public class Billing implements billingAdmin,billingPatient{
         }
         return false;
     }
+
+    /**
+     * Calculates the total bill amount for a given prescription without including the doctor's fee.
+     *
+     * @param prescriptionId The prescription ID.
+     * @return The total amount excluding the doctor's fee.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+    
     public double calculateBillAmountWithoutDoctorFee(String prescriptionId) throws IOException {
         double totalAmount = 0;
 
@@ -133,6 +199,14 @@ public class Billing implements billingAdmin,billingPatient{
         return totalAmount;
     }
 
+    /**
+     * Calculates the total bill amount for a given prescription, including the doctor's fee.
+     *
+     * @param prescriptionId The prescription ID.
+     * @return The total amount including the doctor's fee.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+    
     public double calculateBillAmount(String prescriptionId) throws IOException {
         double totalAmount = 0;
 
@@ -156,6 +230,16 @@ public class Billing implements billingAdmin,billingPatient{
         return totalAmount;
     }
 
+    /**
+     * Retrieves the price of a medication from the inventory.
+     *
+     * @param medicationName The name of the medication.
+     * @return The price of the medication.
+     * @throws IOException              If an I/O error occurs during file reading.
+     * @throws IllegalArgumentException If the medication is not found in the inventory.
+     */
+
+
     private double getMedicationPriceFromInventory(String medicationName) throws IOException {
         try (BufferedReader inventoryReader = new BufferedReader(new FileReader(INVENTORY_FILE))) {
             String line;
@@ -169,6 +253,15 @@ public class Billing implements billingAdmin,billingPatient{
         }
         throw new IllegalArgumentException("Medication not found in inventory: " + medicationName);
     }
+
+    /**
+     * Retrieves all bills associated with a specific patient ID.
+     *
+     * @param patientId The patient ID.
+     * @return A list of bills for the patient.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+    
     public List<Bill> getBillsByPatientId(String patientId) throws IOException {
         List<Bill> bills = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(BILLING_FILE))) {
@@ -187,6 +280,15 @@ public class Billing implements billingAdmin,billingPatient{
         }
         return bills;
     }
+
+    /**
+     * Retrieves all bills from the billing file.
+     *
+     * @return A list of all bills.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+
+    
     public List<Bill> getAllBills() throws IOException {
         List<Bill> bills = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(BILLING_FILE))) {
@@ -227,6 +329,15 @@ public class Billing implements billingAdmin,billingPatient{
     }
 
 
+    /**
+     * Updates the payment status of a bill by its ID.
+     *
+     * @param id   The bill ID.
+     * @param paid The new payment status.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+
+    
     public void updateBill(String id, boolean paid) throws IOException {
         List<Bill> bills = getAllBills();
         for (Bill bill : bills) {
@@ -243,12 +354,27 @@ public class Billing implements billingAdmin,billingPatient{
         updateBillingFile(bills);
     }
 
+    /**
+     * Saves the blockchain to a file.
+     *
+     * @throws IOException If an I/O error occurs during file writing.
+     */
+
+    
     private void saveBlockchain() throws IOException {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(BLOCKCHAIN_FILE))) {
             oos.writeObject(blockchain);
         }
     }
 
+    /**
+     * Loads the blockchain from a file.
+     *
+     * @throws IOException            If an I/O error occurs during file reading.
+     * @throws ClassNotFoundException If the class of a serialized object cannot be found.
+     */
+
+    
     private void loadBlockchain() throws IOException, ClassNotFoundException {
         File file = new File(BLOCKCHAIN_FILE);
         if (file.exists() && file.length() > 0) {
@@ -263,12 +389,26 @@ public class Billing implements billingAdmin,billingPatient{
         }
     }
 
+    /**
+     * Appends a new bill to the billing CSV file.
+     *
+     * @param bill The {@code Bill} object to append.
+     * @throws IOException If an I/O error occurs during file writing.
+     */
+    
     private void updateBillingFile(Bill bill) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(BILLING_FILE, true))) {
             writer.write(bill.toString());
             writer.newLine();
         }
     }
+    
+     /**
+     * Writes the entire list of bills to the billing CSV file, overwriting existing content.
+     *
+     * @param bills The list of bills to write.
+     * @throws IOException If an I/O error occurs during file writing.
+     */
 
     private void updateBillingFile(List<Bill> bills) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(BILLING_FILE))) {
@@ -281,12 +421,35 @@ public class Billing implements billingAdmin,billingPatient{
         }
     }
 
+    /**
+     * Verifies the integrity of the blockchain.
+     *
+     * @return {@code true} if the blockchain is valid; {@code false} otherwise.
+     */
+
     public static boolean verifyBlockchain() {
         return blockchain.isChainValid();
     }
+
+    /**
+     * Marks a bill as paid based on the given bill ID.
+     *
+     * @param BillId The bill ID to mark as paid.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+    
 public void paybill(String BillId) throws IOException {
         updateBill(BillId, true);
     }
+
+    /**
+     * Checks if the given prescription ID is valid by verifying it against the prescription CSV file.
+     *
+     * @param prescriptionId The prescription ID to validate.
+     * @return {@code true} if the prescription ID is valid; {@code false} otherwise.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+    
     private boolean isValidPrescription(String prescriptionId) throws IOException {
         try (BufferedReader prescriptionReader = new BufferedReader(new FileReader(PRESCRIPTION_FILE))) {
             String line;
