@@ -13,11 +13,21 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+/**
+ * The {@code Doctor} class represents a doctor in the hospital management system.
+ * It extends the {@link Staff} class and provides functionalities specific to doctors,
+ * such as managing appointments, viewing and updating medical records, and recording appointment outcomes.
+ */
+
 public class Doctor extends Staff {
 
-
-    // I removed this as I'm not sure what your intention for specialisation is.
-    // It doesn't add any functionality so idk what you're planning to do with it.
+    /**
+     * Constructs a new {@code Doctor} instance by prompting the user for input via a {@code Scanner}.
+     * This constructor is typically used when creating a new doctor account.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @throws IOException If an I/O error occurs during saving the user data.
+     */
 
 
     public Doctor(Scanner scanner) throws IOException {
@@ -29,6 +39,11 @@ public class Doctor extends Staff {
         }
     }
 
+    /**
+     * Saves the doctor's data to the file system.
+     *
+     * @throws IOException If an I/O error occurs during file operations.
+     */
     // Doctor.java
     @Override
     public void save() throws IOException {
@@ -59,6 +74,17 @@ public class Doctor extends Staff {
 
         output.close();
     }
+
+    /**
+     * Constructs a new {@code Doctor} instance with the specified ID, name, and password.
+     * This constructor is typically used when loading an existing doctor account.
+     *
+     * @param id       The unique identifier for the doctor.
+     * @param name     The name of the doctor.
+     * @param password The password for the doctor.
+     * @throws IOException If an I/O error occurs during operations.
+     */
+
 
     public Doctor(String id, String name, String password) throws IOException {
         super(id, name, password, "doctor");
@@ -170,11 +196,23 @@ public class Doctor extends Staff {
         return true;
     }
 
+    /**
+     * Displays the doctor's information.
+     *
+     * @return A string representation of the doctor.
+     */
+
     // TODO: Add proper Doctor formatting
     public String toString() {
         // System.out.printf("%s - %s - %s, %s, %s", this.id, this.role, this.name, this.age, this.gender);
         return this.id + " - Doctor - " + this.name;
     }
+
+     /**
+     * Retrieves the list of appointments assigned to the doctor.
+     *
+     * @return A list of {@link Appointment} objects.
+     */
 
 
     public List<Appointment> viewAppointments() {
@@ -215,6 +253,13 @@ public class Doctor extends Staff {
         return appointments;
     }
 
+    /**
+     * Interactively views and manages pending appointment requests.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
+
+    
     private void viewPendingRequests(Scanner scanner) {
         try {
             System.out.println("\nPending Appointment Requests:\n");
@@ -305,7 +350,11 @@ public class Doctor extends Staff {
         };
     }
     
-
+    /**
+     * Accepts a pending appointment.
+     *
+     * @param appointmentID The ID of the appointment to accept.
+     */
 
     public void acceptappointment(String appointmentID) {
         try {
@@ -329,6 +378,13 @@ public class Doctor extends Staff {
         }
     }
 
+    /**
+     * Declines a pending appointment.
+     *
+     * @param appointmentID The ID of the appointment to decline.
+     * @throws IOException If an I/O error occurs during operations.
+     */
+    
     public void declineappointment(String appointmentID) throws IOException {
         List<Appointment> appointments = viewAppointments();
         boolean updated = false;
@@ -346,6 +402,12 @@ public class Doctor extends Staff {
             System.out.printf("Appointment ID %s not found or already processed.%n", appointmentID);
         }
     }
+
+    /**
+     * Cancels any appointment selected by the doctor.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
 
     private void cancelAnyAppointment(Scanner scanner) {
         List<Appointment> appointments = viewAppointments();
@@ -381,7 +443,12 @@ public class Doctor extends Staff {
         System.out.println("Appointment cancelled successfully.\n");
     }
 
-
+    /**
+     * Cancels an appointment by setting its status to cancelled.
+     *
+     * @param appointmentID The ID of the appointment to cancel.
+     */
+    
     public void cancel(String appointmentID) {
         try {
             List<Appointment> appointments = viewAppointments();
@@ -420,6 +487,12 @@ public class Doctor extends Staff {
         }
     }
 
+    /**
+     * Records the outcome of an appointment.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
+    
     public void recordAppointmentOutcome(Scanner scanner) {
         // Step 1: Ask for Appointment ID directly
         System.out.print("Enter the appointment ID: ");
@@ -499,6 +572,14 @@ public class Doctor extends Staff {
     }
 
 
+    /**
+     * Views the medical records of a patient.
+     *
+     * @param patientId The ID of the patient whose records are to be viewed.
+     * @return A list of string arrays representing the medical records.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+    
     public List<String[]> viewMedicalRecord(String patientId) throws IOException {
         List<String[]> medicalRecords = new ArrayList<>();
         String line;
@@ -520,6 +601,10 @@ public class Doctor extends Staff {
         return medicalRecords;
     }
 
+    /**
+     * Clears all appointments by resetting the appointments file.
+     */
+    
     public void clearAppointments() {
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
 
@@ -546,6 +631,14 @@ public class Doctor extends Staff {
         }
     }
 
+     /**
+     * Updates a patient's medical record.
+     *
+     * @param patientId     The ID of the patient whose record is to be updated.
+     * @param updatedRecord An array of strings representing the updated record.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+    
     public void updateMedicalRecord(String patientId, String[] updatedRecord) throws IOException {
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv";
         String separator = ",";
@@ -572,7 +665,10 @@ public class Doctor extends Staff {
         }
     }
     
-
+    /**
+     * Views the doctor's personal schedule of confirmed appointments.
+     */
+    
     private void viewPersonalSchedule() {
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
         List<Appointment> personalSchedule = new ArrayList<>();
@@ -644,7 +740,17 @@ public class Doctor extends Staff {
         } catch (Exception e) {
             System.out.println("Error parsing date/time. Please try again.");
         }
-    }
+    }    
+
+    /**
+     * Generates time slots for appointments based on the provided parameters.
+     *
+     * @param start           The start date and time.
+     * @param end             The end date and time.
+     * @param intervalMinutes The duration of each slot in minutes.
+     * @return A list of generated {@link Appointment} slots.
+     */
+
 
     //Making helper function to generate time slots
     private List<Appointment> generateTimeSlots(LocalDateTime start, LocalDateTime end, int intervalMinutes) {
@@ -666,7 +772,13 @@ public class Doctor extends Staff {
             slotTime = slotTime.plusMinutes(intervalMinutes);
         }
         return slots;
-    }
+    }    
+
+    /**
+     * Saves the generated appointment time slots to the file system.
+     *
+     * @param slots The list of {@link Appointment} slots to save.
+     */
 
     //Making helper function to save time slots
     private void saveTimeSlots(List<Appointment> slots) {
