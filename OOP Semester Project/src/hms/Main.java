@@ -7,7 +7,20 @@ import java.util.NoSuchElementException;
 import java.util.Scanner;
 // import java.util.Date;
 
+/**
+ * The {@code Main} class serves as the entry point for the Hospital Management System (HMS).
+ * It handles user authentication, registration, and navigation to different user roles within the system.
+ */
+
 class Main {
+
+  /**
+     * The main method that initiates the HMS application.
+     * It displays a welcome message and starts the event loop.
+     *
+     * @param args Command-line arguments (not used).
+     * @throws IOException If an I/O error occurs during file operations.
+     */
 
   public static void main(String[] args) throws IOException {
     System.out.println("██╗   ██╗ ███╗   ███╗ ███████╗");
@@ -29,6 +42,14 @@ class Main {
     System.out.println("Bye!");
   }
 
+  /**
+     * The main event loop that handles user interaction for login, sign-up, and password recovery.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @return {@code true} to continue the loop; {@code false} to exit the application.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+  
   public static boolean eventLoop(Scanner scanner) throws IOException {
     // Load data on program startup
     List<User> users;
