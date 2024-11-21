@@ -1,7 +1,10 @@
 package hms;
 
 import java.util.Date;
-
+/**
+ * The {@code DiagnosisTreatment} class represents the relationship between a diagnosis and its corresponding treatment plan.
+ * It includes details such as diagnosis ID, treatment ID, dates of diagnosis and treatment, and a description.
+ */
 public class DiagnosisTreatment {
     private String diagnosisID;
     private String treatmentID;
@@ -9,6 +12,18 @@ public class DiagnosisTreatment {
     private Date startDate;
     private Date endDate;
     private String description;
+
+    
+    /**
+     * Constructs a new {@code DiagnosisTreatment} instance with the specified details.
+     *
+     * @param diagnosisID   The unique identifier for the diagnosis.
+     * @param treatmentID   The unique identifier for the treatment.
+     * @param dateDiagnosed The date when the diagnosis was made.
+     * @param startDate     The start date of the treatment.
+     * @param endDate       The end date of the treatment.
+     * @param description   A description of the diagnosis and treatment plan.
+     */
 
     public DiagnosisTreatment(String diagnosisID, String treatmentID, Date dateDiagnosed, Date startDate, Date endDate, String description) {
         this.diagnosisID = diagnosisID;
@@ -67,6 +82,12 @@ public class DiagnosisTreatment {
         this.description = description;
     }
 
+    /**
+     * Returns a string representation of the {@code DiagnosisTreatment} object.
+     *
+     * @return A string containing the details of the diagnosis and treatment.
+     */
+    
     @Override
     public String toString() {
         return "DiagnosisTreatment{" +
