@@ -7,12 +7,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * The {@code Prescription} class represents a prescription in the hospital management system.
+ * It contains information about the prescribed medication, quantity, status, and provides methods
+ * to save and retrieve prescriptions from a CSV file.
+ */
+
 public class Prescription {
     private String id; // Prescription ID
     private String medicationName;
     private int quantity; // New field for quantity
     private PrescriptionStatus status;
 
+    /**
+     * Constructs a new {@code Prescription} with the specified details.
+     *
+     * @param id             The unique prescription ID.
+     * @param medicationName The name of the medication.
+     * @param quantity       The quantity prescribed.
+     * @param status         The current status of the prescription.
+     */
+    
     public Prescription(String id, String medicationName, int quantity, PrescriptionStatus status) {
         this.id = id;
         this.medicationName = medicationName;
@@ -44,6 +59,13 @@ public class Prescription {
         this.status = newStatus;
     }
 
+    /**
+     * Returns a string representation of the prescription.
+     *
+     * @return A formatted string containing prescription details.
+     */
+
+
     @Override
     public String toString() {
         return "Prescription ID: " + this.id +
@@ -52,6 +74,13 @@ public class Prescription {
                 ", Status: " + this.status;
     }
 
+    /**
+     * Saves the prescription to a CSV file. If the prescription already exists,
+     * it updates the existing entry; otherwise, it adds a new entry.
+     *
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+    
     public void save() throws IOException {
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\prescription.csv";
         File file = new File(filePath);
@@ -92,6 +121,14 @@ public class Prescription {
         }
     }
 
+    /**
+     * Retrieves all prescriptions from the CSV file.
+     *
+     * @return A list of {@code Prescription} objects.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+
+    
     public static List<Prescription> getAll() throws IOException {
         List<Prescription> prescriptions = new ArrayList<>();
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\prescription.csv";
@@ -120,6 +157,11 @@ public class Prescription {
 
         return prescriptions;
     }
+     /**
+     * Generates a random prescription ID consisting of a 4-digit number.
+     *
+     * @return A random prescription ID as a {@code String}.
+     */
 
     public static String generateRandomPrescriptionID() {
         int randomId = new Random().nextInt(9000) + 1000; // Generate a 4-digit ID
