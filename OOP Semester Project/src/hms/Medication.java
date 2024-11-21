@@ -1,5 +1,12 @@
 package hms;
 
+/**
+ * The {@code Medication} class represents a medication item in the hospital management system.
+ * It includes details such as medication name, price, stock level, low stock alert level,
+ * and whether a low stock alert is active.
+ */
+
+
 public class Medication {
     private String medicationName;
     private int price;
@@ -7,6 +14,17 @@ public class Medication {
     private int lowStockAlertLevel;
     private boolean stocklevelalert; // Correct field name casing to align with standard practices
 
+    /**
+     * Constructs a new {@code Medication} instance with the specified details.
+     * Initializes the stock level alert based on the stock level and low stock alert level.
+     *
+     * @param medicationName     The name of the medication.
+     * @param price              The price of the medication.
+     * @param stockLevel         The current stock level.
+     * @param lowStockAlertLevel The stock level at which to trigger a low stock alert.
+     */
+
+    
     public Medication(String medicationName, int price, int stockLevel, int lowStockAlertLevel) {
         this.medicationName = medicationName;
         this.price = price;
@@ -66,6 +84,12 @@ public class Medication {
         return price;
     }
 
+    /**
+     * Returns a string representation of the {@code Medication} object.
+     *
+     * @return A formatted string containing the medication details.
+     */
+    
     @Override
     public String toString() {
         return String.format(
