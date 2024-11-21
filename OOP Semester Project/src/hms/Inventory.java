@@ -7,6 +7,13 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The {@code Inventory} class manages a collection of medications in the hospital management system.
+ * It provides functionalities to add, remove, update, and retrieve medications,
+ * as well as loading from and saving to a CSV file.
+ */
+
+
 public class Inventory {
     private List<Medication> medications;
 
@@ -14,12 +21,26 @@ public class Inventory {
         medications = new ArrayList<>();
     }
 
+    /**
+     * Adds a medication to the inventory.
+     * Sets the stock level alert based on the current stock and low stock alert level.
+     *
+     * @param medication The {@code Medication} object to add.
+     */
+
+    
     public void addMedication(Medication medication) {
         medication.setStockLevelAlert(medication.getStockLevel() < medication.getLowStockAlertLevel());
         medications.add(medication);
     }
     
-
+    /**
+     * Removes a medication from the inventory based on its name.
+     *
+     * @param medicationName The name of the medication to remove.
+     * @return {@code true} if the medication was removed; {@code false} otherwise.
+     */
+    
     public boolean removeMedication(String medicationName) {
         boolean removed = medications.removeIf(medication -> 
             medication.getMedicationName().equalsIgnoreCase(medicationName)
@@ -27,7 +48,13 @@ public class Inventory {
         return removed; // Only return true if something was actually removed
     }
     
-
+    /**
+     * Updates the stock level of a specific medication.
+     *
+     * @param medicationName The name of the medication to update.
+     * @param quantity       The new stock level quantity.
+     */
+    
     public void updateStockLevel(String medicationName, int quantity) {
         for (Medication med : medications) {
             if (med.getMedicationName().equals(medicationName)) {
@@ -36,6 +63,14 @@ public class Inventory {
             }
         }
     }
+
+    /**
+     * Retrieves a medication from the inventory based on its name.
+     * Loads the inventory from the CSV file before searching.
+     *
+     * @param medicationName The name of the medication to retrieve.
+     * @return The {@code Medication} object if found; {@code null} otherwise.
+     */
 
     public Medication getMedication(String medicationName) {
         loadFromCSV();
@@ -47,10 +82,24 @@ public class Inventory {
         return null;
     }
 
+    /**
+     * Retrieves the list of all medications in the inventory.
+     *
+     * @return A list of {@code Medication} objects.
+     */
+
+    
     public List<Medication> getMedications() {
         return medications;
     }
 
+
+    /**
+     * Saves the current inventory to a CSV file.
+     *
+     * @param filePath The file path where the inventory should be saved.
+     */
+    
     public void saveToCSV(String filePath) {
         try (FileWriter writer = new FileWriter(filePath)) {
             writer.write("Name,Price,StockLevel,LowStockAlertLevel,stocklevelalert\n"); // Write the header
@@ -61,7 +110,12 @@ public class Inventory {
             System.out.println("Error saving inventory data: " + e.getMessage());
         }
     }
-
+    
+    /**
+     * Loads the inventory data from a CSV file.
+     * Clears the current list before loading.
+     */
+    
     public void loadFromCSV() {
         medications.clear();
         try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv"))) {
@@ -96,7 +150,10 @@ public class Inventory {
         }
     }
     
-
+    /**
+     * Checks for medications that are below their low stock alert level and prints an alert message.
+     */
+    
     public void checkLowStockAlerts() {
         for (Medication med : medications) {
             if (med.getStockLevel() < med.getLowStockAlertLevel()) {
