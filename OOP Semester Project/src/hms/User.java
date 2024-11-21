@@ -6,16 +6,26 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * The {@code User} class is an abstract base class that represents a user in the hospital management system.
+ * It includes common attributes and methods shared by all types of users, such as patients, doctors, administrators, and pharmacists.
+ */
+
 public abstract class User {
   public String id;
   public String name;
   private String password;
   public final String role;
 
-  // When a constructor with a scanner is used, it is expected for the subclass to
-  // prompt for data.
-  // All subclasses should implement the scanner constructor pattern to create new
-  // instance.
+    /**
+     * Constructs a new {@code User} by prompting for necessary information via a {@code Scanner}.
+     * This constructor is intended to be called from subclasses when creating a new user.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @param role    The role of the user.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+  
   public User(Scanner scanner, String role) throws IOException {
     System.out.print("Enter a name for this new user: ");
     String name = scanner.nextLine();
@@ -86,6 +96,15 @@ public abstract class User {
 
   }
 
+   /**
+     * Constructs a new {@code User} with the specified attributes.
+     * This constructor is intended to be called when loading user data from a file.
+     *
+     * @param id       The unique identifier for the user.
+     * @param name     The name of the user.
+     * @param password The password for the user's account.
+     * @param role     The role of the user.
+     */
 
   public User(String id, String name, String password, String role) {
     this.id = id;
@@ -94,10 +113,25 @@ public abstract class User {
     this.role = role;
   }
 
+   /**
+     * Validates the user's login by comparing the provided password with the stored password.
+     *
+     * @param password The password entered by the user.
+     * @return {@code true} if the password matches; {@code false} otherwise.
+     */
+  
   public boolean login(String password) {
     return this.password.equals(password);
   }
 
+   /**
+     * Loads all users from the specified CSV file.
+     *
+     * @param path The file path to load users from.
+     * @return A list of {@code User} objects.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+  
   public static List<User> loadFromFile(String path) throws IOException {
     List<User> userArray = new ArrayList<User>();
     BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"));
@@ -120,6 +154,12 @@ public abstract class User {
     return userArray;
   }
 
+  /**
+     * Saves the user's information to the CSV file. If the user already exists, their information is updated.
+     *
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+  
   public void save() throws IOException {
     String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
 
@@ -149,7 +189,17 @@ public abstract class User {
     }
 }
 
+/**
+     * Allows a user to reset their password if they have forgotten it.
+     * Validates the user's identity based on their hospital ID and name.
+     *
+     * @param hospitalId The hospital ID of the user.
+     * @param name       The name of the user.
+     * @param scanner    The {@code Scanner} object to read user input.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
 
+  
 public static void forgotPassword(String hospitalId, String name, Scanner scanner) throws IOException {
   List<User> users = loadFromFile("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv");
   User userToReset = null;
@@ -182,11 +232,24 @@ public static void forgotPassword(String hospitalId, String name, Scanner scanne
   }
 }
 
+  /**
+     * Retrieves the user's password.
+     * This method is protected to allow subclasses access if necessary.
+     *
+     * @return The user's password.
+     */
+  
 protected String getPassword() {
   return this.password;
 }
-
-
+  /**
+     * The event loop that handles user-specific interactions.
+     * Subclasses must implement this method to provide functionality.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @return {@code true} to continue; {@code false} to log out.
+     * @throws IOException If an I/O error occurs during operations.
+     */
   // Return true to logout
   public abstract boolean eventLoop(Scanner scanner) throws IOException;
 }
