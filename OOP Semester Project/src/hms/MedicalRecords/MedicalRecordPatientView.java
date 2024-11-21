@@ -2,6 +2,12 @@ package hms.MedicalRecords;
 
 import java.io.IOException;
 
+/**
+ * Interface representing the patient's view of their medical records.
+ * Provides methods for patients to interact with their medical records,
+ * such as updating contact information, adding allergies, diagnoses, and treatments.
+ */
+
 public interface MedicalRecordPatientView {
   String toString();
 
