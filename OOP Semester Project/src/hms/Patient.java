@@ -10,11 +10,34 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * The {@code Patient} class represents a patient user in the hospital management system.
+ * It extends the {@link User} class and provides functionalities specific to patients,
+ * such as viewing and updating medical records, scheduling appointments, and giving feedback.
+ */
+
+
 public class Patient extends User {
+
+    /**
+     * The patient's medical record, viewed through a patient-specific interface.
+     * This ensures that only methods intended for patients are accessible.
+     */
+    
     // Store MedicalRecord as a PatientView so only Patient methods are exposed.
     private MedicalRecordPatientView patientRecord;
 
     // Prompt for information about patient
+
+    /**
+     * Constructs a new {@code Patient} by prompting for information via a {@code Scanner}.
+     * Initializes the patient record and saves it to file.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     * @throws IOException If an I/O error occurs during saving operations.
+     */
+
+    
     public Patient(Scanner scanner) throws IOException {
         super(scanner, "patient"); // Creates base User
         
@@ -34,6 +57,18 @@ public class Patient extends User {
             System.out.println("Error saving Medical Record: " + error.getMessage());
         }
     }
+
+
+    /**
+     * Constructs a new {@code Patient} with the specified ID, name, and password.
+     * Loads the patient's medical record if it exists; otherwise, creates a new one.
+     *
+     * @param id       The patient's ID.
+     * @param name     The patient's name.
+     * @param password The patient's password.
+     * @throws IOException If an I/O error occurs during operations.
+     */
+
     
     public Patient(String id, String name, String password) throws IOException {
         super(id, name, password, "patient");
@@ -45,7 +80,14 @@ public class Patient extends User {
             this.patientRecord.saveToFile(); // Save new MedicalRecords if not found
         }
     }
-    
+
+    /**
+     * The main event loop for the patient, providing a menu of options to interact with the system.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     * @return {@code true} to continue the loop; {@code false} to log out.
+     * @throws IOException If an I/O error occurs during operations.
+     */
     
     public boolean eventLoop(Scanner scanner) throws IOException {
         System.out.print("""
@@ -135,6 +177,14 @@ public class Patient extends User {
         }
         return true;
     }
+
+    /**
+     * Allows the patient to reschedule or cancel an existing appointment.
+     * Prompts the patient to select an appointment to cancel and optionally schedule a new one.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     */
+
     public void rescheduleOrCancelAppointment(Scanner scanner) {
         try {
             System.out.println("To reschedule an appointment, you need to cancel an existing appointment.");
@@ -197,6 +247,13 @@ public class Patient extends User {
             error.printStackTrace();
         }
     }
+
+     /**
+     * Allows the patient to schedule a new appointment by selecting from available slots.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     */
+
     public void scheduleAppointment(Scanner scanner) {
     try {
         List<Appointment> appts = AppointmentPatientView.loadAllAppointments();
@@ -250,6 +307,12 @@ public class Patient extends User {
 }
 
 
+    /**
+     * Views the outcome records of an appointment specified by appointment ID.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     */
+    
     private void viewAppointmentOutcomeRecords(Scanner scanner) {
     System.out.print("Enter the appointment ID to search: ");
     String searchAppointmentId = scanner.nextLine();
@@ -304,6 +367,11 @@ public void viewMedicalRecord() {
     }
 }
 
+/**
+     * Allows the patient to provide feedback about the hospital management system.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     */
 
 
 private void giveFeedback(Scanner scanner) {
@@ -369,6 +437,13 @@ private void giveFeedback(Scanner scanner) {
             error.printStackTrace();
         }
     }
+    
+    /**
+     * Allows the patient to pay a bill by entering the bill ID.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     */
+    
     private void payBill(Scanner scanner) {
         System.out.print("Enter the bill ID to pay: ");
         String billId = scanner.nextLine();
@@ -381,6 +456,12 @@ private void giveFeedback(Scanner scanner) {
         }
     }
 
+    /**
+     * Allows the patient to add a new allergy to their medical record.
+     *
+     * @param scanner The {@code Scanner} object for reading user input.
+     */
+    
     private void addAllergyToMedicalRecord(Scanner scanner) {
         System.out.print("Enter a new allergy to add: ");
         String allergy = scanner.nextLine().trim();
