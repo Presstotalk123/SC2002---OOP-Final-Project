@@ -7,6 +7,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Represents an appointment outcome record, including appointment details,
+ * prescribed medications, and consultation notes. Provides methods to save
+ * and retrieve appointment records from a CSV file, and to save prescribed
+ * medications to their respective CSV files.
+ */
+
 public class AppointmentOutcomeRecord {
     private String appointmentID;
     private Date dateOfAppointment;
@@ -20,10 +27,25 @@ public class AppointmentOutcomeRecord {
         this.serviceType = serviceType;
         this.prescribedMedications = prescribedMedications;
         this.consultationNotes = consultationNotes;
+
+        /**
+     * Constructs an AppointmentOutcomeRecord with the specified details.
+     *
+     * @param appointmentID         The unique identifier for the appointment.
+     * @param dateOfAppointment     The date of the appointment.
+     * @param serviceType           The type of service provided during the appointment.
+     * @param prescribedMedications The list of prescriptions given during the appointment.
+     * @param consultationNotes     The notes taken during the consultation.
+     */
+
+        
         createPrescriptions(); // Automatically save prescriptions when creating the record
     }
 
-    // Save prescribed medications to their respective CSV
+    /**
+     * Saves the prescribed medications to their respective CSV files.
+     * Logs any IOExceptions encountered during the process.
+     */
     private void createPrescriptions() {
         for (Prescription prescription : prescribedMedications) {
             try {
@@ -36,25 +58,60 @@ public class AppointmentOutcomeRecord {
         }
     }
 
+    /**
+     * Gets the appointment ID.
+     *
+     * @return The appointment ID.
+     */
+    
     public String getAppointmentID() {
         return appointmentID;
     }
+
+    /**
+     * Gets the date of the appointment.
+     *
+     * @return The date of the appointment.
+     */
 
     public Date getDateOfAppointment() {
         return dateOfAppointment;
     }
 
+    /**
+     * Gets the service type provided during the appointment.
+     *
+     * @return The service type.
+     */
+    
     public String getServiceType() {
         return serviceType;
     }
+
+     /**
+     * Gets the list of prescribed medications.
+     *
+     * @return The list of prescriptions.
+     */
 
     public List<Prescription> getPrescribedMedications() {
         return prescribedMedications;
     }
 
+    /**
+     * Gets the consultation notes.
+     *
+     * @return The consultation notes.
+     */
+
     public String getConsultationNotes() {
         return consultationNotes;
     }
+
+    /**
+     * Reads all appointment outcome records from a CSV file and displays them.
+     * Each record includes appointment details and associated prescriptions.
+     */
 
     public static void getAllRecords() {
         //List<AppointmentOutcomeRecord> records = new ArrayList<>();
@@ -104,6 +161,12 @@ public class AppointmentOutcomeRecord {
 
 }
 
+    /**
+     * Saves the appointment outcome record to a CSV file.
+     *
+     * @param filePath The file path of the CSV file.
+     */
+    
     public void saveToCSV(String filePath) {
         try (FileWriter fileWriter = new FileWriter(filePath, true);
              PrintWriter printWriter = new PrintWriter(fileWriter)) {
@@ -122,6 +185,13 @@ public class AppointmentOutcomeRecord {
         }
     }
 
+    /**
+     * Returns a string representation of the appointment outcome record.
+     *
+     * @return A string containing the appointment details, prescribed medications, and consultation notes.
+     */
+
+    
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -134,7 +204,15 @@ public class AppointmentOutcomeRecord {
         }
         sb.append("\nConsultation Notes: ").append(consultationNotes);
         return sb.toString();
-    }
+    }    
+
+    /**
+     * Returns a string representation of the appointment outcome record using the specified prescription IDs.
+     *
+     * @param a A string containing prescription IDs.
+     * @return A string representation of the appointment outcome record.
+     */
+    
     public String toString2(String a) {
         StringBuilder sb = new StringBuilder();
         sb.append("Appointment ID: ").append(appointmentID).append("\n");
