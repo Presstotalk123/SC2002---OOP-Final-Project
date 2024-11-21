@@ -8,8 +8,23 @@ import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * The {@code Pharmacist} class represents a pharmacist in the hospital management system.
+ * It extends the {@link Staff} class and provides functionalities specific to pharmacists,
+ * such as viewing appointment outcome records, updating prescription statuses,
+ * managing medication inventory, and submitting replenishment requests.
+ */
+
 public class Pharmacist extends Staff {
 
+    /**
+     * Constructs a new {@code Pharmacist} instance by prompting the user for input via a {@code Scanner}.
+     * This constructor is typically used when creating a new pharmacist account.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @throws IOException If an I/O error occurs during saving the user data.
+     */
+    
     public Pharmacist(Scanner scanner) throws IOException {
         super(scanner, "pharmacist");
         try {
@@ -19,9 +34,26 @@ public class Pharmacist extends Staff {
         }
     }
 
+    /**
+     * Constructs a new {@code Pharmacist} instance with the specified ID, name, and password.
+     * This constructor is typically used when loading an existing pharmacist account.
+     *
+     * @param id       The unique identifier for the pharmacist.
+     * @param name     The name of the pharmacist.
+     * @param password The password for the pharmacist.
+     * @throws IOException If an I/O error occurs during operations.
+     */
+    
     public Pharmacist(String id, String name, String password) throws IOException {
         super(id, name, password, "pharmacist");
     }
+
+    /**
+     * The main event loop for the pharmacist, providing a menu of options to interact with the system.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @return {@code true} if the pharmacist wishes to continue; {@code false} to log out.
+     */
 
     public boolean eventLoop(Scanner scanner) {
         System.out.print("""
@@ -99,6 +131,14 @@ public class Pharmacist extends Staff {
     }
 
 
+    /**
+     * Updates the status of a prescription and adjusts inventory if necessary.
+     *
+     * @param prescriptionId The ID of the prescription to update.
+     * @param status         The new status to set for the prescription.
+     * @throws IOException If an I/O error occurs during file operations.
+     */
+    
     public void updatePrescriptionStatus(String prescriptionId, PrescriptionStatus status) throws IOException {
         List<Prescription> records = Prescription.getAll();
         Inventory inventory = new Inventory();
@@ -132,27 +172,11 @@ public class Pharmacist extends Staff {
         }
         
 }
+    
+/**
+     * Displays the current medication inventory.
+     */
 
-
-
-
-
-
-    private boolean checkAppointmentStatus(String appointmentId) throws IOException {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
-
-        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                String[] values = line.split(",");
-                if (values.length > 0 && values[0].equals(appointmentId)) {
-                    String status = values[4].trim(); // Assuming index 4 is status
-                    return "completed".equalsIgnoreCase(status);
-                }
-            }
-        }
-        return false; // Return false if appointment not found or not completed
-    }
 
 
     public void displayMedicationInventory() {
@@ -171,6 +195,14 @@ public class Pharmacist extends Staff {
         }
     }
 
+    /**
+     * Submits a replenishment request for a medication.
+     *
+     * @param medicationName The name of the medication to replenish.
+     * @param quantity       The quantity to replenish.
+     */
+
+    
     // In the submitReplenishmentRequest method
     public void submitReplenishmentRequest(String medicationName, int quantity) {
         // Create a new replenishment request
@@ -185,8 +217,11 @@ public class Pharmacist extends Staff {
         return "REQ" + System.currentTimeMillis();
     }
 
-   
-    
+   /**
+     * Returns a string representation of the pharmacist.
+     *
+     * @return A string containing the pharmacist's ID, role, and name.
+     */
 
     @Override
         public String toString() {
