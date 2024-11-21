@@ -10,12 +10,26 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
+/**
+ * The {@code Administrator} class represents an administrator user in the hospital management system.
+ * It extends the {@link User} class and provides functionalities specific to administrators,
+ * such as managing staff, appointments, inventory, billing, and viewing feedback.
+ */
+
 public class Administrator extends User {
     private Billing billing;
     private List<Staff> staffList;
     private List<Appointment> appointmentList;
     private Inventory inventory;
 
+    /**
+     * Constructs a new {@code Administrator} instance by prompting the user for input via a {@code Scanner}.
+     * This constructor is typically used when creating a new administrator account.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @throws IOException If an I/O error occurs during saving the user data.
+     */
+    
     public Administrator(Scanner scanner) throws IOException {
         super(scanner, "administrator");
         try {
@@ -33,6 +47,15 @@ public class Administrator extends User {
         loadInventoryData();
     }
 
+    /**
+     * Constructs a new {@code Administrator} instance with the specified ID, name, and password.
+     * This constructor is typically used when loading an existing administrator account.
+     *
+     * @param id       The unique identifier for the administrator.
+     * @param name     The name of the administrator.
+     * @param password The password for the administrator.
+     */
+    
     public Administrator(String id, String name, String password) {
         super(id, name, password, "administrator");
         staffList = new ArrayList<>();
@@ -44,6 +67,14 @@ public class Administrator extends User {
         loadInventoryData();
     }
 
+    /**
+     * The main event loop for the administrator, providing a menu of options to interact with the system.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @return {@code true} if the administrator wishes to continue; {@code false} to log out.
+     * @throws IOException If an I/O error occurs during operations.
+     */
+    
     public boolean eventLoop(Scanner scanner) throws IOException {
         int choice;
         System.out.println("Administrator Menu:");
@@ -94,6 +125,12 @@ public class Administrator extends User {
         return true;
     }
 
+    /**
+     * Displays the list of staff members.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
+    
     private void viewStaff(Scanner scanner) {
         System.out.println("Viewing staff...");
         for (Staff staff : staffList) {
@@ -104,11 +141,23 @@ public class Administrator extends User {
         scanner.nextLine(); // Wait for user to press Enter
     }
 
+     /**
+     * Ensures that the billing system is initialized.
+     */
+
+    
     private void ensureBillingInitialized() {
         if (billing == null) {
             billing = new Billing();
         }
     }
+
+    /**
+     * Manages staff-related operations such as adding, updating, and removing staff.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @throws IOException If an I/O error occurs during operations.
+     */
 
 
     private void manageStaff(Scanner scanner) throws IOException {
@@ -145,6 +194,14 @@ public class Administrator extends User {
         } while (choice != 5);
     }
 
+    /**
+     * Adds a new staff member to the system.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @throws IOException If an I/O error occurs during saving staff data.
+     */
+
+    
     private void addStaff(Scanner scanner) throws IOException {
         System.out.println("Enter Staff Role:");
         String role = scanner.nextLine();
@@ -162,6 +219,13 @@ public class Administrator extends User {
         System.out.println("Staff member added successfully.");
     }
 
+    /**
+     * Updates an existing staff member's information.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
+
+    
     private void updateStaff(Scanner scanner) {
         System.out.println("Enter Staff ID to update:");
         String id = scanner.nextLine();
@@ -213,7 +277,12 @@ public class Administrator extends User {
         System.out.println("Staff member not found.");
     }
     
-    
+    /**
+     * Removes a staff member from the system.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
+
 
     private void removeStaff(Scanner scanner) {
         System.out.println("Enter Staff ID to remove:");
@@ -235,6 +304,9 @@ public class Administrator extends User {
         System.out.println("Staff list size after removal: " + staffList.size());
     }
     
+    /**
+     * Saves user data to the users.csv file, including administrator and staff data.
+     */
 
     private void saveUsersData() {
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
@@ -279,9 +351,12 @@ public class Administrator extends User {
     }
     
     
-    
+     /**
+     * Filters staff members based on role or gender.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
 
-    
     
 
     private void filterStaff(Scanner scanner) {
@@ -317,11 +392,21 @@ public class Administrator extends User {
         scanner.nextLine(); // Wait for user to press Enter
     }
 
+    /**
+     * Displays all appointments.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
+
     private void viewAppointments(Scanner scanner) {
         viewAllAppointments();
         System.out.println("Press Enter to return to the admin menu.");
         scanner.nextLine(); // Wait for user input
     }
+
+    /**
+     * Reads and displays all appointments from the appointments.csv file.
+     */
     
     private void viewAllAppointments() {
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
@@ -358,8 +443,13 @@ public class Administrator extends User {
         }
     }
     
-    
+    /**
+     * Manages inventory-related operations such as viewing, adding, updating, and removing inventory items.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
 
+    
     private void manageInventory(Scanner scanner) {
         int choice;
         do {
@@ -398,6 +488,12 @@ public class Administrator extends User {
         } while (choice != 6);
     }
 
+    /**
+     * Removes a user from the users.csv file based on user ID.
+     *
+     * @param userId The unique identifier of the user to remove.
+     */
+    
     private void removeUserFromCSV(String userId) {
         String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
     
@@ -414,6 +510,11 @@ public class Administrator extends User {
         }
     }
     
+     /**
+     * Displays the current inventory.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
 
     private void viewInventory(Scanner scanner) {
         System.out.println("Current Inventory:");
@@ -436,7 +537,13 @@ public class Administrator extends User {
     }
     
 
+    /**
+     * Adds a new inventory item.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
 
+    
     private void addInventoryItem(Scanner scanner) {
         System.out.println("Enter Medicine Name:");
         String name = scanner.nextLine();
@@ -455,6 +562,11 @@ public class Administrator extends User {
         System.out.println("Inventory item added successfully.");
     }
     
+    /**
+     * Updates an existing inventory item.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
 
     private void updateInventoryItem(Scanner scanner) {
         System.out.println("Enter Medicine Name to update:");
@@ -491,7 +603,13 @@ public class Administrator extends User {
             System.out.println("Inventory item not found.");
         }
     }
-    
+
+    /**
+     * Removes an inventory item based on its medication name.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
+
 
 
     private void removeInventoryItem(Scanner scanner) {
@@ -506,7 +624,12 @@ public class Administrator extends User {
         }
     }
     
-    
+
+    /**
+     * Approves a replenishment request for inventory items.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     */
 
     private void approveReplenishmentRequest(Scanner scanner) {
         System.out.println("Enter Replenishment Request ID to approve:");
@@ -531,6 +654,14 @@ public class Administrator extends User {
         System.out.println("Replenishment request not found.");
     }
 
+
+    /**
+     * Saves the list of replenishment requests to the CSV file.
+     *
+     * @param requests The list of {@link ReplenishmentRequest} objects to save.
+     */
+
+    
     private void saveReplenishmentRequests(List<ReplenishmentRequest> requests) {
         try (PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\replenishment_requests.csv"))) {
             writer.println("requestID,medicationName,quantity,status");
@@ -541,6 +672,13 @@ public class Administrator extends User {
             System.out.println("Error saving replenishment requests: " + e.getMessage());
         }
     }
+    
+    /**
+     * Creates a bill for a patient based on prescription IDs.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @throws IOException If an I/O error occurs during billing operations.
+     */
 
     public void createBill(Scanner scanner) throws IOException {
         ensureBillingInitialized();  // Add this line to make sure billing is initialized
@@ -575,6 +713,14 @@ if(count!=0) {
 }
     }
 
+
+    /**
+     * Views bills for a specific patient ID.
+     *
+     * @throws IOException If an I/O error occurs during billing operations.
+     */
+
+    
     public void viewBills() throws IOException {
         ensureBillingInitialized(); // Ensure that the billing is initialized
 
@@ -599,10 +745,21 @@ if(count!=0) {
 
         System.out.println("---------------------------------------------------------------------------------------------------------");
     }
+
+    /**
+     * Generates a unique identifier for a bill.
+     *
+     * @return A unique bill ID.
+     */
+    
     private String generateId() {
         return "BILL" + System.currentTimeMillis();
     }
-
+    
+     /**
+     * Views feedback from patients.
+     */
+    
     private void viewFeedback() {
         try {
             List<String> feedbackList = Feedback.viewAllFeedback();
@@ -642,6 +799,14 @@ if(count!=0) {
         }
     }
 
+    /**
+     * Helper method to wrap text to a specified width.
+     *
+     * @param text  The text to wrap.
+     * @param width The maximum width per line.
+     * @return A list of wrapped text lines.
+     */
+
     // Helper method to wrap text to a specified width
     private List<String> wrapText(String text, int width) {
         List<String> wrappedLines = new ArrayList<>();
@@ -655,7 +820,10 @@ if(count!=0) {
     }
 
 
-
+    /**
+     * Verifies the integrity of the billing blockchain.
+     */
+    
     private void verifyBlockchain() {
         if (Billing.verifyBlockchain()) {
             System.out.println("Blockchain is valid.");
@@ -663,7 +831,10 @@ if(count!=0) {
             System.out.println("Blockchain integrity compromised!");
         }
     }
-
+    
+    /**
+     * Loads staff data from the users.csv file.
+     */
 
     private void loadStaffData() {
 
@@ -697,7 +868,10 @@ if(count!=0) {
     private void loadInventoryData() {
         inventory.loadFromCSV();
     }
-    
+
+    /**
+     * Saves staff data to the staff.csv file.
+     */
 
     private void saveStaffData() {
         String staffFilePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\staff.csv";
