@@ -9,12 +9,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.io.File;
 import java.util.Random;
+
+/**
+ * Represents a replenishment request for medications.
+ */
+
 public class ReplenishmentRequest {
     private String requestID;
     private String medicationName;
     private int quantity;
     private String status;
 
+
+    /**
+     * Constructs a new ReplenishmentRequest.
+     *
+     * @param requestID      the unique ID for the request.
+     * @param medicationName the name of the medication requested.
+     * @param quantity       the quantity of the medication requested.
+     * @param status         the status of the request (e.g., Pending, Approved).
+     */
+    
     public ReplenishmentRequest(String requestID, String medicationName, int quantity, String status) {
         this.requestID = requestID;
         this.medicationName = medicationName;
@@ -65,6 +80,7 @@ public class ReplenishmentRequest {
      * @param filePath the path of the CSV file.
      * @return a list of ReplenishmentRequest objects.
      */
+    
     public static List<ReplenishmentRequest> loadFromCSV(String filePath) {
         List<ReplenishmentRequest> requests = new ArrayList<>();
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
