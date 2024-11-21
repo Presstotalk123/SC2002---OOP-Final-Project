@@ -8,6 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Interface representing the patient's view of appointments.
+ * Provides methods for patients to interact with their appointments,
+ * such as scheduling, canceling, and retrieving appointment details.
+ */
+
 public interface AppointmentPatientView {
 
   String getId();
@@ -26,6 +32,13 @@ public interface AppointmentPatientView {
 
   boolean isBookable();
 
+  /**
+     * Loads all appointments from the data source.
+     *
+     * @return A list of all appointments.
+     * @throws IOException If an I/O error occurs during the load operation.
+     */
+  
   static List<Appointment> loadAllAppointments() throws IOException {
     List<Appointment> appointments = new ArrayList<>();
 
