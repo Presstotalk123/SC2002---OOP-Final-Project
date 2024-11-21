@@ -15,6 +15,12 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
+/**
+ * The {@code MedicalRecords} class represents the medical records of a patient.
+ * It implements both {@code MedicalRecordPatientView} and {@code MedicalRecordDoctorView} interfaces,
+ * allowing both patients and doctors to interact with the medical records.
+ */
+
 public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDoctorView {
 
     private String id;
@@ -28,6 +34,16 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
     private String bloodType; // final as this field should not be updated.
     private List<String> allergies;
 
+     /**
+     * Constructs a new {@code MedicalRecords} object by prompting the user for input via a {@code Scanner}.
+     * This constructor is typically used when creating a new patient record.
+     *
+     * @param scanner The {@code Scanner} object to read user input.
+     * @param id      The unique identifier for the patient.
+     * @param name    The name of the patient.
+     */
+
+    
     public MedicalRecords(Scanner scanner, String id, String name) {
         this.id = id;
         this.name = name;
@@ -86,6 +102,14 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
 
     }
 
+    /**
+     * Constructs a new {@code MedicalRecords} object by loading data from a file.
+     * This constructor is typically used when retrieving an existing patient record.
+     *
+     * @param id The unique identifier for the patient.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
+
     private MedicalRecords(String id) throws IOException {
 
         String[] record = MedicalRecords.loadMedicalRecordFromFile(id);
@@ -108,6 +132,14 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
 
     }
 
+    /**
+     * Retrieves the medical record for a patient from the perspective of a patient user.
+     *
+     * @param caller    The patient user requesting the record.
+     * @param patientId The ID of the patient whose record is requested.
+     * @return A {@code MedicalRecordPatientView} of the patient's medical record.
+     */
+    
     public static MedicalRecordPatientView getRecord(Patient caller, String patientId) {
         try {
             return new MedicalRecords(patientId);
@@ -118,6 +150,15 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         }
     }
 
+     /**
+     * Retrieves the medical record for a patient from the perspective of a doctor user.
+     *
+     * @param caller    The doctor user requesting the record.
+     * @param patientId The ID of the patient whose record is requested.
+     * @return A {@code MedicalRecordDoctorView} of the patient's medical record.
+     */
+
+    
     public static MedicalRecordDoctorView getRecord(Doctor caller, String patientId) {
         try {
             return new MedicalRecords(patientId);
@@ -127,6 +168,14 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
             return null;
         }
     }
+
+    /**
+     * Loads the medical record data for a patient from the file system.
+     *
+     * @param id The unique identifier for the patient.
+     * @return An array of strings containing the patient's medical record data.
+     * @throws IOException If an I/O error occurs during file reading.
+     */
 
     private static String[] loadMedicalRecordFromFile(String id) throws IOException {
         BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"));
@@ -150,6 +199,12 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         throw new IOException("Missing or Invalid Patient Data found in MedicalRecords.csv for patient with ID: " + id);
     }
 
+    /**
+     * Updates the email address of the patient.
+     *
+     * @param email The new email address.
+     */
+
     // From MedicalRecordPatientAccess
     public void updateEmailAddress(String email) {
         // TODO: Maybe add validation?
@@ -158,6 +213,12 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         }
     }
 
+    /**
+     * Updates the phone number of the patient.
+     *
+     * @param phoneNumber The new phone number.
+     */
+    
     // From MedicalRecordPatientAccess
     public void updatePhoneNumber(String phoneNumber) {
         // TODO: Maybe add validation?
@@ -166,13 +227,12 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         }
     }
 
-    // From MedicalRecordDoctorAccess
-
-    // From MedicalRecordDoctorAccess
-
-    // From MedicalRecordDoctorAccess
-
-
+    /**
+     * Returns a string representation of the medical record.
+     *
+     * @return A string containing the patient's medical record information.
+     */
+    
     public String toString() {
         return new StringBuilder()
                 .append("Patient ID: " + this.id + "\n")
@@ -188,6 +248,12 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
                 .toString();
     }
 
+    /**
+     * Saves the medical record to the file system.
+     *
+     * @throws IOException If an I/O error occurs during file writing.
+     */
+    
     public void saveToFile() throws IOException {
         List<String> lines = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"));
         FileOutputStream output = new FileOutputStream("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv");
@@ -224,6 +290,13 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         output.close();
     }
 
+    /**
+     * Adds a diagnosis to the patient's medical record.
+     *
+     * @param diagnosis The diagnosis to add.
+     * @throws IOException If an I/O error occurs during file writing.
+     */
+
     public void addDiagnosis(String diagnosis) throws IOException {
         if (diagnosis == null || diagnosis.trim().isEmpty()) {
             diagnosis = "Not Available";
@@ -233,6 +306,14 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         System.out.println("Diagnosis added successfully!");
     }
 
+    /**
+     * Adds a treatment to the patient's medical record.
+     *
+     * @param treatments The treatments to add.
+     * @throws IOException If an I/O error occurs during file writing.
+     */
+
+    
     public void addTreatments(String treatments) throws IOException {
         if (treatments == null || treatments.trim().isEmpty()) {
             treatments = "Not Available";
@@ -242,6 +323,12 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
         System.out.println("Treatments added successfully!");
     }
 
+    /**
+     * Adds an allergy to the patient's medical record.
+     *
+     * @param allergy The allergy to add.
+     */
+    
     @Override
     public void addAllergy(String allergy) {
         if (!allergies.contains(allergy)) {
