@@ -134,8 +134,8 @@ public class Appointment implements AppointmentPatientView, AppointmentDoctorVie
 
     public void save() throws IOException {
 
-        List<String> lines = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv"));
-        FileOutputStream output = new FileOutputStream("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv");
+        List<String> lines = Files.readAllLines(Paths.get("../data/appointments.csv"));
+        FileOutputStream output = new FileOutputStream("../data/appointments.csv");
 
         boolean isEntryFound = false;
         for (int i = 0; i < lines.size(); i++) {

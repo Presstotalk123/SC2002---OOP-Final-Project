@@ -117,7 +117,7 @@ public class AppointmentOutcomeRecord {
         //List<AppointmentOutcomeRecord> records = new ArrayList<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointment_outcome_records.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("../data/appointment_outcome_records.csv"))) {
             String line;
             boolean isFirstLine = true;
             while ((line = br.readLine()) != null) {

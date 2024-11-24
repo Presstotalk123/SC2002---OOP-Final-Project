@@ -316,7 +316,7 @@ public class Patient extends User {
     private void viewAppointmentOutcomeRecords(Scanner scanner) {
     System.out.print("Enter the appointment ID to search: ");
     String searchAppointmentId = scanner.nextLine();
-    String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointment_outcome_records.csv";
+    String filePath = "../data/appointment_outcome_records.csv";
 
     try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
         String line;

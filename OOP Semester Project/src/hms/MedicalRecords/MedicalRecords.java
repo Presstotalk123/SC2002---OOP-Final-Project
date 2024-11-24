@@ -178,7 +178,7 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
      */
 
     private static String[] loadMedicalRecordFromFile(String id) throws IOException {
-        BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"));
+        BufferedReader file = new BufferedReader(new FileReader("../data/Patient.csv"));
 
         String nextLine;
         while ((nextLine = file.readLine()) != null) {
@@ -255,8 +255,8 @@ public class MedicalRecords implements MedicalRecordPatientView, MedicalRecordDo
      */
     
     public void saveToFile() throws IOException {
-        List<String> lines = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"));
-        FileOutputStream output = new FileOutputStream("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv");
+        List<String> lines = Files.readAllLines(Paths.get("../data/Patient.csv"));
+        FileOutputStream output = new FileOutputStream("../data/Patient.csv");
 
         boolean isEntryFound = false;
 

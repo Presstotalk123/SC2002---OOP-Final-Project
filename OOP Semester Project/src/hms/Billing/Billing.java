@@ -11,10 +11,10 @@ import java.util.List;
  */
 
 public class Billing implements billingAdmin,billingPatient{
-    private static final String BILLING_FILE = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\billing.csv";
-    private static final String BLOCKCHAIN_FILE = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\blockchain.dat";
-    private static final String PRESCRIPTION_FILE = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\prescription.csv";
-    private static final String INVENTORY_FILE = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv";
+    private static final String BILLING_FILE = "../data/billing.csv";
+    private static final String BLOCKCHAIN_FILE = "../data/blockchain.dat";
+    private static final String PRESCRIPTION_FILE = "../data/prescription.csv";
+    private static final String INVENTORY_FILE = "../data/inventory.csv";
 
     private static Blockchain blockchain;
 
@@ -134,7 +134,7 @@ public class Billing implements billingAdmin,billingPatient{
      */
     
     private boolean isValidPatient(String patientId) throws IOException {
-        try (BufferedReader reader = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("../data/users.csv"))) {
             String line;
             reader.readLine(); // Skip header
             while ((line = reader.readLine()) != null) {

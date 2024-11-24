@@ -8,7 +8,7 @@ import java.util.*;
  */
 
 public class Feedback {
-    private static final String FEEDBACK_FILE = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\feedback.csv";
+    private static final String FEEDBACK_FILE = "../data/feedback.csv";
     private String id; // Unique feedback ID
     private String patientId;
     private String comments;

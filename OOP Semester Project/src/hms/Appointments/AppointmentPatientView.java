@@ -42,7 +42,7 @@ public interface AppointmentPatientView {
   static List<Appointment> loadAllAppointments() throws IOException {
     List<Appointment> appointments = new ArrayList<>();
 
-    try (BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv"))) {
+    try (BufferedReader file = new BufferedReader(new FileReader("../data/appointments.csv"))) {
       String nextLine = file.readLine();
       while ((nextLine = file.readLine()) != null) {
         String[] appt = nextLine.split(",");

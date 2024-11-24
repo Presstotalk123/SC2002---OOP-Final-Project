@@ -48,8 +48,8 @@ public class Doctor extends Staff {
     @Override
     public void save() throws IOException {
         // staff.csv: id,gender,age,role,phoneNumber,email,specialization
-        List<String> lines = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"));
-        FileOutputStream output = new FileOutputStream("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv");
+        List<String> lines = Files.readAllLines(Paths.get("../data/Patient.csv"));
+        FileOutputStream output = new FileOutputStream("../data/Patient.csv");
 
         boolean isEntryFound = false;
         for (int i = 0; i < lines.size(); i++) {
@@ -220,7 +220,7 @@ public class Doctor extends Staff {
         String line;
         String separator = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("../data/appointments.csv"))) {
             br.readLine(); // Skip header row
 
             while ((line = br.readLine()) != null) {
@@ -546,7 +546,7 @@ public class Doctor extends Staff {
                 consultationNotes
         );
 
-        record.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointment_outcome_records.csv");
+        record.saveToCSV("../data/appointment_outcome_records.csv");
         System.out.println("Appointment outcome recorded successfully.");
 
         try {
@@ -585,7 +585,7 @@ public class Doctor extends Staff {
         String line;
         String separator = ",";
 
-        try (BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("../data/Patient.csv"))) {
             // Skip header row
             br.readLine();
 
@@ -606,7 +606,7 @@ public class Doctor extends Staff {
      */
     
     public void clearAppointments() {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
+        String filePath = "../data/appointments.csv";
 
         try {
             // Read all lines, retaining only the header
@@ -640,7 +640,7 @@ public class Doctor extends Staff {
      */
     
     public void updateMedicalRecord(String patientId, String[] updatedRecord) throws IOException {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\Patient.csv";
+        String filePath = "../data/Patient.csv";
         String separator = ",";
         List<String> lines = new ArrayList<>();
     
@@ -670,7 +670,7 @@ public class Doctor extends Staff {
      */
     
     private void viewPersonalSchedule() {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
+        String filePath = "../data/appointments.csv";
         List<Appointment> personalSchedule = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {

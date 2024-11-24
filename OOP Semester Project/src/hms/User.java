@@ -43,7 +43,7 @@ public abstract class User {
     }
 
     Random rand = new Random();
-    List<String> existingIds = Files.readAllLines(Paths.get("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"))
+    List<String> existingIds = Files.readAllLines(Paths.get("../data/users.csv"))
             .stream()
             .map(line -> line.split(",")[0])
             .collect(Collectors.toList());
@@ -134,7 +134,7 @@ public abstract class User {
   
   public static List<User> loadFromFile(String path) throws IOException {
     List<User> userArray = new ArrayList<User>();
-    BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"));
+    BufferedReader file = new BufferedReader(new FileReader("../data/users.csv"));
     String nextLine = file.readLine();
     while ((nextLine = file.readLine()) != null) {
       String[] user = nextLine.split(",");
@@ -161,7 +161,7 @@ public abstract class User {
      */
   
   public void save() throws IOException {
-    String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
+    String filePath = "../data/users.csv";
 
     // Read all lines from the file
     List<String> lines = Files.readAllLines(Paths.get(filePath));
@@ -201,7 +201,7 @@ public abstract class User {
 
   
 public static void forgotPassword(String hospitalId, String name, Scanner scanner) throws IOException {
-  List<User> users = loadFromFile("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv");
+  List<User> users = loadFromFile("../data/users.csv");
   User userToReset = null;
 
   for (User user : users) {

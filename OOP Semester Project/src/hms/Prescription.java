@@ -82,7 +82,7 @@ public class Prescription {
      */
     
     public void save() throws IOException {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\prescription.csv";
+        String filePath = "../data/prescription.csv";
         File file = new File(filePath);
         String header = "Prescription ID,Medication Name,Quantity,Status";
 
@@ -131,7 +131,7 @@ public class Prescription {
     
     public static List<Prescription> getAll() throws IOException {
         List<Prescription> prescriptions = new ArrayList<>();
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\prescription.csv";
+        String filePath = "../data/prescription.csv";
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String header = br.readLine();

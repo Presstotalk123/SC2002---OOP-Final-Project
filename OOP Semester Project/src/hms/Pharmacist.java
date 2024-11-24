@@ -158,7 +158,7 @@ public class Pharmacist extends Staff {
                         int quantityDispensed = record.getQuantity(); // Get the quantity from the prescription
                         int newStockLevel = med.getStockLevel() - quantityDispensed; // Subtract the dispensed quantity
                         inventory.updateStockLevel(record.getMedicationName(), newStockLevel);
-                        inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
+                        inventory.saveToCSV("../data/inventory.csv");
                     }
                 }
                 break; // Exit the loop as we found the prescription
@@ -209,7 +209,7 @@ public class Pharmacist extends Staff {
         ReplenishmentRequest request = new ReplenishmentRequest(
                 generateRequestID(), medicationName, quantity, "Pending");
         // Submit the request (this will also create the file if it doesn't exist)
-        request.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\replenishment_requests.csv");
+        request.saveToCSV("../data/replenishment_requests.csv");
     }
 
     private String generateRequestID() {

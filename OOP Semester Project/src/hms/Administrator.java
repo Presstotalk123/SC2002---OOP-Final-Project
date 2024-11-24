@@ -309,7 +309,7 @@ public class Administrator extends User {
      */
 
     private void saveUsersData() {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
+        String filePath = "../data/users.csv";
     
         try {
             List<String> updatedLines = Files.lines(Paths.get(filePath))
@@ -409,7 +409,7 @@ public class Administrator extends User {
      */
     
     private void viewAllAppointments() {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\appointments.csv";
+        String filePath = "../data/appointments.csv";
         
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -495,7 +495,7 @@ public class Administrator extends User {
      */
     
     private void removeUserFromCSV(String userId) {
-        String filePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv";
+        String filePath = "../data/users.csv";
     
         try {
             List<String> updatedLines = Files.lines(Paths.get(filePath))
@@ -558,7 +558,7 @@ public class Administrator extends User {
         newMedication.setStockLevelAlert(stock < lowStockLevel); // Calculate stock alert
         inventory.addMedication(newMedication);
     
-        inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
+        inventory.saveToCSV("../data/inventory.csv");
         System.out.println("Inventory item added successfully.");
     }
     
@@ -597,7 +597,7 @@ public class Administrator extends User {
                 item.setLowStockAlertLevel(Integer.parseInt(newLowStock));
             }
     
-            inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
+            inventory.saveToCSV("../data/inventory.csv");
             System.out.println("Inventory item updated successfully.");
         } else {
             System.out.println("Inventory item not found.");
@@ -617,7 +617,7 @@ public class Administrator extends User {
         String name = scanner.nextLine();
         
         if (inventory.removeMedication(name)) {
-            inventory.saveToCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv");
+            inventory.saveToCSV("../data/inventory.csv");
             System.out.println("Inventory item removed successfully.");
         } else {
             System.out.println("Inventory item not found.");
@@ -634,7 +634,7 @@ public class Administrator extends User {
     private void approveReplenishmentRequest(Scanner scanner) {
         System.out.println("Enter Replenishment Request ID to approve:");
         String requestID = scanner.nextLine();
-        List<ReplenishmentRequest> requests = ReplenishmentRequest.loadFromCSV("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\replenishment_requests.csv");
+        List<ReplenishmentRequest> requests = ReplenishmentRequest.loadFromCSV("../data/replenishment_requests.csv");
 
         for (ReplenishmentRequest request : requests) {
             if (request.getRequestID().equals(requestID)) {
@@ -663,7 +663,7 @@ public class Administrator extends User {
 
     
     private void saveReplenishmentRequests(List<ReplenishmentRequest> requests) {
-        try (PrintWriter writer = new PrintWriter(new FileWriter("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\replenishment_requests.csv"))) {
+        try (PrintWriter writer = new PrintWriter(new FileWriter("../data/replenishment_requests.csv"))) {
             writer.println("requestID,medicationName,quantity,status");
             for (ReplenishmentRequest request : requests) {
                 writer.printf("%s,%s,%d,%s%n", request.getRequestID(), request.getMedicationName(), request.getQuantity(), request.getStatus());
@@ -841,7 +841,7 @@ if(count!=0) {
         try {
             this.staffList.clear();
 
-            BufferedReader file = new BufferedReader(new FileReader("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\users.csv"));
+            BufferedReader file = new BufferedReader(new FileReader("../data/users.csv"));
             String nextLine = file.readLine();
             while ((nextLine = file.readLine()) != null) {
                 String[] user = nextLine.split(",");
@@ -874,7 +874,7 @@ if(count!=0) {
      */
 
     private void saveStaffData() {
-        String staffFilePath = "C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\staff.csv";
+        String staffFilePath = "../data/staff.csv";
     
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(staffFilePath))) {
             // Write the header
@@ -901,7 +901,7 @@ if(count!=0) {
     
 
     private void saveInventoryData() {
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter("C:\\Users\\welcome\\Desktop\\OOP---SC2002-Group-Project 3\\OOP---SC2002-Group-Project\\OOP Semester Project\\data\\inventory.csv"))) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("../data/inventory.csv"))) {
             // Write the header with 5 fields
             bw.write("medicationName,price,stockLevel,lowStockAlertLevel,stockLevelAlert");
             bw.newLine();
